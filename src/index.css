@@ -1,0 +1,196 @@
+@import "tailwindcss";
+
+@theme {
+  --color-shrine-cream: #faf6ec;
+  --color-shrine-parchment: #f2e9d6;
+  --color-shrine-parchment-dark: #e7d9b8;
+  --color-shrine-stone: #dccfae;
+  --color-shrine-ink: #2a2115;
+  --color-shrine-charcoal: #423a2c;
+
+  --color-shrine-maroon-50: #fbf0ee;
+  --color-shrine-maroon-100: #f3d9d4;
+  --color-shrine-maroon-500: #7c2a25;
+  --color-shrine-maroon-600: #691f1e;
+  --color-shrine-maroon-700: #55191a;
+  --color-shrine-maroon-800: #431315;
+  --color-shrine-maroon-900: #33100f;
+  --color-shrine-maroon-950: #200a0a;
+
+  --color-shrine-gold-100: #f8ecd2;
+  --color-shrine-gold-300: #e2bf72;
+  --color-shrine-gold-400: #d1a955;
+  --color-shrine-gold-500: #c3963f;
+  --color-shrine-gold-600: #a67a2e;
+
+  --color-shrine-pine-500: #335840;
+  --color-shrine-pine-600: #26402f;
+  --color-shrine-pine-700: #1c3123;
+
+  --color-shrine-terracotta-400: #c17a53;
+  --color-shrine-terracotta-500: #ab5f3c;
+
+  --shadow-shrine: 0 20px 60px -20px rgba(51, 16, 15, 0.45);
+  --shadow-shrine-lg: 0 40px 90px -30px rgba(51, 16, 15, 0.55);
+
+  --font-display: "Fraunces", "Iowan Old Style", serif;
+  --font-sans: "Source Sans 3", system-ui, sans-serif;
+  --font-body: var(--font-sans);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-shrine-cream text-shrine-ink font-sans antialiased;
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display text-shrine-maroon-700;
+  }
+
+  ::selection {
+    background-color: var(--color-shrine-gold-300);
+    color: var(--color-shrine-maroon-900);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-shrine-gold-500);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .bg-adobe-texture {
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.06), transparent 40%),
+      radial-gradient(circle at 80% 60%, rgba(0, 0, 0, 0.08), transparent 45%);
+  }
+
+  .bg-grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+  }
+
+  .divider-weave {
+    background-image: repeating-linear-gradient(
+      45deg,
+      var(--color-shrine-gold-500) 0 6px,
+      var(--color-shrine-maroon-600) 6px 12px,
+      var(--color-shrine-pine-600) 12px 18px
+    );
+  }
+
+  .divider-weave-thin {
+    height: 3px;
+    background-image: repeating-linear-gradient(
+      90deg,
+      var(--color-shrine-gold-500) 0 10px,
+      var(--color-shrine-maroon-600) 10px 20px,
+      var(--color-shrine-pine-600) 20px 30px
+    );
+  }
+
+  .gold-rule {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-shrine-gold-500) 18%,
+      var(--color-shrine-gold-300) 50%,
+      var(--color-shrine-gold-500) 82%,
+      transparent
+    );
+    transform-origin: center;
+    animation: gold-rule-draw 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .gold-rule-left {
+    height: 1px;
+    background: linear-gradient(90deg, var(--color-shrine-gold-500), transparent);
+    transform-origin: left;
+    animation: gold-rule-draw 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes gold-rule-draw {
+    from {
+      transform: scaleX(0);
+      opacity: 0;
+    }
+    to {
+      transform: scaleX(1);
+      opacity: 1;
+    }
+  }
+
+  .mask-fade-b {
+    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  }
+
+  @keyframes hero-ken-burns {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.05);
+    }
+  }
+
+  .hero-ken-burns {
+    animation: hero-ken-burns 20s ease-out forwards;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+
+  .reveal-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+
+    .hero-ken-burns {
+      animation: none;
+    }
+  }
+
+  .skip-link {
+    @apply fixed left-4 top-4 z-[100] -translate-y-24 rounded-sm bg-shrine-gold-500 px-5 py-3 text-sm font-semibold text-shrine-maroon-900 transition-transform duration-200 focus:translate-y-0;
+  }
+}
