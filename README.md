@@ -270,4 +270,4 @@ Private — all rights reserved. © St Joseph's Church (Bukit Timah), Archdioces
 
 ---
 
-**Docs:** [`docs/prompts.md`](docs/prompts.md) · [`CLAUDE.md`](CLAUDE.md) · [`AGENTS.md`](AGENTS.md) · **Live:** [stjoseph-bt.org.sg](https://stjoseph-bt.org.sg/)
+**Docs:** [`rothershrine-v2_SKILL.md`](rothershrine-v2_SKILL.md) · [`CLAUDE.md`](CLAUDE.md) · [`AGENTS.md`](AGENTS.md) · **Live:** [stjoseph-bt.org.sg](https://stjoseph-bt.org.sg/)
