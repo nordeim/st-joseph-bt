@@ -16,4 +16,23 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
     },
   },
+  test: {
+    globals: true,
+    environment: "jsdom",
+    setupFiles: ["src/test/setup.ts"],
+    include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    exclude: ["e2e/**", "node_modules/**", "playwright-report/**", "test-results/**"],
+  },
+  server: {
+    watch: {
+      ignored: [
+        "**/skills/**",
+        "**/dist/**",
+        "**/playwright-report/**",
+        "**/test-results/**",
+        "**/coverage/**",
+        "**/src.orig/**",
+      ],
+    },
+  },
 });

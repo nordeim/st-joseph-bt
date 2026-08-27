@@ -1,0 +1,1329 @@
+---
+name: st-joseph-bt
+display_name: St Joseph's Church (Bukit Timah) — Singapore
+version: 1.0.0
+last_updated: 2026-08-27T12:00Z
+project_state: static SPA — 0 unit tests + 20 E2E stale (ported from rothershrine v1.3.0 — remediated M1+C0+H0, then fresh-clone audit H1+H2+M1–M6), lint+typecheck+build green, singlefile deploy (pinned exact, pnpm 11)
+stack: react 19.2.8 / vite 7.3.6 / tailwind 4.3.3 (@tailwindcss/vite 4.1.17) / typescript 5.9.3 / react-router 7.18.2 / singlefile 2.3.3 / eslint 9.39.5 flat / vitest 3.2.6 jsdom / testing-library 16.2.0 / playwright 1.55.1 chromium (20 E2E stale — awaiting rewrite)
+rendering: static SPA (HashRouter, no SSR)
+data_layer: file-backed typed arrays in src/data/* + const site object
+deploy: vite-plugin-singlefile → dist/index.html + dist/images/ → GH Pages / S3 (publicDir copy — not inlined)
+port_provenance: Singapore port of https://stjoseph-bt.org.sg/ — St Joseph's Church (Bukit Timah), 620 Upper Bukit Timah Road, Singapore 678116 — second-oldest Catholic parish; frozen Rother Shrine original preserved in src.orig/ (not imported, not linted, not type-checked)
+---
+
+# `st-joseph-bt` — Engineering Skill
+
+> **How to use this document:** This is the single-source-of-truth for any future agent extending, debugging, onboarding, or replicating the St Joseph's Church (Bukit Timah) port. Read §§ 1–4 for identity and constraints, §5 for where to put code, §§ 9–11 before shipping, and §§ 15–20 as copy-pasteable contracts. Every version, hex, and path is verified against `package.json` / `src/index.css` / `tsconfig.json` / `src/data/*` — if it drifts, fix this file first.
+
+**Sources of truth:** `README.md` (visitor overview) → `AGENTS.md` (60-sec cheat sheet) → `CLAUDE.md` (deep workflow, 6-phase) → this file (complete distillate) → `src.orig/` (frozen Rother Shrine reference, not built). If they conflict, trust executable config.
+
+**Migration note:** This file is the Bukit Timah distillate of `rothershrine-v2_SKILL.md` v1.3.0 (2026-08-27). The sectional skeleton (§§ 1–20 + Appendices + Quick Ref) is preserved verbatim; all Rother Shrine narrative has been replaced with facts verified against `src/App.tsx` / `src/data/content.ts` / `src/data/nav.ts` / `src/data/site.ts` / `public/images/`. See Appendix D for the full port diff.
+
+---
+
+## Table of Contents
+
+1. [Project Identity & Design Philosophy](#1-project-identity--design-philosophy)
+2. [Tech Stack & Environment](#2-tech-stack--environment)
+3. [Bootstrapping & Configuration](#3-bootstrapping--configuration)
+4. [The Design System (Code-First)](#4-the-design-system-code-first)
+5. [Component Architecture & Patterns](#5-component-architecture--patterns)
+6. [Custom Hooks Deep Dive](#6-custom-hooks-deep-dive)
+7. [Content Management & Data Ingestion](#7-content-management--data-ingestion)
+8. [Accessibility (WCAG AAA) Implementation](#8-accessibility-wcag-aaa-implementation)
+9. [Anti-Patterns & Common Bugs](#9-anti-patterns--common-bugs)
+10. [Debugging Guide](#10-debugging-guide)
+11. [Pre-Ship Checklist](#11-pre-ship-checklist)
+12. [Lessons Learnt & How to Avoid Them](#12-lessons-learnt--how-to-avoid-them)
+13. [Pitfalls to Avoid](#13-pitfalls-to-avoid)
+14. [Best Practices](#14-best-practices)
+15. [Coding Patterns](#15-coding-patterns)
+16. [Coding Anti-Patterns](#16-coding-anti-patterns)
+17. [Responsive Breakpoint Reference](#17-responsive-breakpoint-reference)
+18. [Z-Index Layer Map](#18-z-index-layer-map)
+19. [Color Reference (Complete)](#19-color-reference-complete)
+20. [The Complete TypeScript Interface Reference](#20-the-complete-typescript-interface-reference)
+- [Appendix A — ADRs](#appendix-a--adrs-architecture-decision-records)
+- [Appendix B — Live-Site Validation](#appendix-b--live-site-validation)
+- [Appendix C — The Meticulous Approach (6-Phase Workflow)](#appendix-c--the-meticulous-approach-6-phase-workflow)
+- [Appendix D — Migration Note (Rother → Bukit Timah)](#appendix-d--migration-note-rother--bukit-timah)
+- [Quick Reference Card](#quick-reference-card)
+
+---
+
+## 1. Project Identity & Design Philosophy
+
+**One sentence:** A reverent, editorial parish site for St Joseph's Church (Bukit Timah) — Singapore's second-oldest Catholic parish (est. 1846), the church on the hill at 620 Upper Bukit Timah Road, home to the last remaining Catholic church cemetery in Singapore and to a living Mandarin, English, and dialect community under the patronage of St Joseph the Worker (feast 1 May).
+
+**The parish in one breath:** Kranji River attap chapel (1846, Fr Anatole Mauduit M.E.P. walking inland to pepper and gambier plantations) → 1853 Palladian church on six Doric columns at Upper Bukit Timah → 1861 statue of St Joseph and the birth of feast-day pilgrimage → rubber and return in the 1910s → Fr Joachim Teng's 1964 rebuild (cattle and milk on the grounds, the feast-day food fair, blessed 30 Aug 1964 by Archbishop Michel Olçomendy) → 1991 life-sized Stations of the Cross around the boundary, columbarium blessed 1995, parish hall 1997 → consecration by Archbishop Nicholas Chia 1 May 2012, Rosary Garden blessed by Archbishop William Goh 25 Mar 2017 where Mauduit's headstone still rests among the trees.
+
+**Parish constants (canonical in `src/data/site.ts`):**
+
+| Fact | Value | Source |
+|---|---|---|
+| Name | St Joseph's Church (Bukit Timah) — `shortName` St Joseph's Bukit Timah — `chineseName` 圣若瑟堂 | `site.name / shortName / chineseName` |
+| Address | 620 Upper Bukit Timah Road, Singapore 678116 | `site.address.full` (with `query` getter for maps) |
+| Tagline / Vision | "A vibrant, evangelizing and missionary Church, under the patronage of St Joseph." / "To nourish faith in a loving, outreaching community." | `site.tagline / site.vision` |
+| Patronal feast | Feast of St Joseph the Worker — **1 May** | `site.feast` |
+| Gates | Daily 8.00 a.m.–9.00 p.m. | `site.hours.gates` |
+| Transport | Cashew MRT (Downtown Line); buses 67, 75, 170, 176, 178, 184, 961, 963, 970 | `site.transport` |
+| Contacts | Parish Priest +65 6760 0052, Assistant +65 6760 4636, Office +65 6769 1666 | `site.contact` |
+| Giving identity | UEN **T08CC4043C**, cheque payable **St. Joseph's Church (Bukit Timah)** | `site.uen / site.chequePayee` |
+
+**Design thesis — "Reverent, not austere":** Warm parchment/maroon/gold on cream, generous whitespace, Fraunces display + Source Sans 3 body. Every page is a welcome from the hill — Mandarin at dawn, English through the day — not a brochure. No purple gradients, no `Inter` defaults, no generic card-grid templates.
+
+**Non-negotiable rules:**
+
+1. **Parish fidelity over pixel theft** — rephrase narrative, preserve Singapore facts exactly (dates, M.E.P. spelling, hill/cemetery/Rosary Garden details, Mass times, UEN). Never reintroduce Oklahoma/Guatemala/Tz'utujil/Tepeyac narratives — they belong only in `src.orig/`.
+2. **Single-file deployability** — must remain a standalone `index.html` (+ `dist/images/`) shippable to GH Pages/S3 without a server. No SSR, no API until explicitly requested.
+3. **Static-first data** — parish copy lives in `src/data/content.ts` + `src/data/nav.ts` + canonical facts in `src/data/site.ts`; no CMS/API to invent.
+4. **Accessibility is doctrinal** — keyboard-navigable header, 4.5:1 contrast on `shrine-ink/cream`, meaningful `alt`, `prefers-reduced-motion` respect, SkipLink hash discipline under HashRouter.
+
+**Anti-generic mandate:** Reject `Inter`/`Roboto` safety, purple-on-white clichés, predictable 3-col hero grids. Whitespace is structure. See `avant-garde-design-v4` when adding sections.
+
+---
+
+## 2. Tech Stack & Environment
+
+| Layer | Technology | Locked Version | Critical Note |
+|---|---|---|---|
+| UI Runtime | `react` / `react-dom` | `19.2.8` | Hooks-only, no class components; `StrictMode` in `src/main.tsx` |
+| Routing | `react-router-dom` | `7.18.2` | `HashRouter` intentionally for static hosts; see ADR-1 |
+| Build | `vite` / `@vitejs/plugin-react` | `7.3.6` / `5.2.0` | Node ≥20 required; HMR default; alias `@→src/` |
+| Styling | `tailwindcss` / `@tailwindcss/vite` | `4.3.3` / `4.1.17` | **CSS-first `@theme` inline** — no `tailwind.config.*`; tokens in `src/index.css` |
+| Language | `typescript` / `@types/react` / `@types/react-dom` / `@types/node` | `5.9.3` / `19.2.18` / `19.2.5` / `22.20.1` | `strict` + `noUnusedLocals/Params` — breaches fail `tsc` |
+| Icons | `lucide-react` | `1.34.0` | Header/footer + Home quick-facts + Give icons |
+| Utils | `clsx` / `tailwind-merge` | `2.1.1` / `3.6.0` | `cn()` = `twMerge(clsx(...))` — only merge path |
+| Bundling | `vite-plugin-singlefile` | `2.3.3` | Inlines JS+CSS into `dist/index.html`; `public/images/` → `dist/images/` (not inlined) |
+| Fonts | Google Fonts (CDN, `index.html`) | — | `Fraunces` 400/500/600/700 + `Source Sans 3` 400/500/600/700; no runtime loader |
+
+> All versions pinned exact (no `^`) in `package.json` (`pnpm@11.0.0`, `engines: node>=20`). Re-pin on upgrade; `pnpm --frozen-lockfile` in CI verifies lockfile. `package.json` version is **1.0.0** for the Bukit Timah port (rothershrine line was 1.3.0 — see Appendix D).
+
+**Environment:** No `.env`, no DB, no auth, no docker. `pnpm` is the supported manager (`--frozen-lockfile` in CI). `npm ci` fails on these exact pins (typescript-eslint 8.28.0 peer range predates TS 5.9) — use `npm ci --legacy-peer-deps` if npm is unavoidable. `skills/` is vendored, git-tracked reference content (not project source) — tooling ignores it. `src.orig/` is the frozen Rother original — also ignored (eslint + tsc).
+
+**Test harness — current reality (2026-08-27):**
+
+| Suite | Status | Detail |
+|---|---|---|
+| `vitest` unit (`pnpm test`) | **0 tests / 0 files** — hollow but green | `src/test/setup.ts` deleted; `src/` has no `*.test.*`. `pnpm test` exits 0 with "no test files found". `src.orig/` retains the 6-file/29-test reference suite. |
+| `playwright` E2E (`pnpm test:e2e`) | **20 tests stale — will fail** | 4 specs (smoke 7, navigation 5, what-to-see 4, give-faq 4) still assert Rother routes/content (`/about-blessed-stanley-rother`, `/what-to-see`, `/pilgrimage`, `#pilgrim-center`/`#shrine-church`/`#tepeyac-hill`, "shepherd who stayed", "Apla's Circle"). Do not run as a gate until rewritten for Bukit Timah routes. |
+| `lint` / `typecheck` / `build` | Green on fresh clones | `eslint 9.39.5` flat `--max-warnings 0`, `tsc --noEmit` strict, `viteSingleFile` → `dist/index.html` + `dist/images/` |
+
+---
+
+## 3. Bootstrapping & Configuration
+
+### 3.1 From Zero to Running
+
+```bash
+git clone <repo-url> st-joseph-bt && cd st-joseph-bt
+pnpm install --frozen-lockfile  # deterministic — versions pinned exact (pnpm 11.0.0)
+# npm users: `npm ci --legacy-peer-deps` (typescript-eslint 8.28.0 peer predates TS 5.9)
+pnpm dev                # → http://localhost:5173 (Vite HMR)
+pnpm lint               # → eslint 9.39.5 flat — must be clean (--max-warnings 0)
+pnpm typecheck          # → tsc --noEmit — must be silent
+pnpm test               # → vitest 3.2.6 jsdom — 0 tests (hollow, exits 0)
+pnpm test:e2e           # → playwright 1.55.1 chromium — 20 tests STALE (expect failure until rewrite)
+pnpm build              # → dist/index.html + dist/images/ (viteSingleFile 2.3.3 inlines JS+CSS; publicDir copied)
+pnpm preview            # → http://localhost:4173 (preview dist)
+```
+
+**Pre-push gate — current minimum (until tests are rewritten):**
+
+```bash
+pnpm lint && pnpm typecheck && pnpm build
+# Full gate (restore before enforcing):
+# pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build
+```
+
+### 3.2 Critical Config Files
+
+| File | Purpose | Gotcha |
+|---|---|---|
+| `vite.config.ts` | `plugins: [react(), tailwindcss(), viteSingleFile()]` + `resolve.alias["@"]` | **No `test` block** — vitest defaults apply. **No `server.watch.ignored`** — previously ignored `**/skills/**` etc.; re-add if `ENOSPC` returns from vendored `skills/` tree. `@` must stay in sync (`vite.config.ts` ↔ `tsconfig.json` `paths`). |
+| `tsconfig.json` | `ES2020`/`ESNext`/`bundler`/`react-jsx`/`strict`/`noUnused*`/`isolatedModules`/`noEmit` + `include ["src","vite.config.ts"]` + `types ["node"]` + `paths {"@/*":["src/*"]}` + `baseUrl:"."` | Only `src` + `vite.config.ts` are included. `eslint.config.js`/`playwright.config.ts` are **not** included (they are not type-checked). Adding a file outside `src/` requires expanding `include`. |
+| `eslint.config.js` | flat config (`eslint 9.39.5` + `@eslint/js 9.39.5` + `typescript-eslint 8.28.0` + `react-hooks 5.2.0` + `react-refresh 0.4.19` + `globals 16.1.0`) — ignores `dist/node_modules/coverage/playwright-report/test-results` **and `skills` and `src.orig`** | Flat. `pnpm lint:fix` → `eslint . --fix`. Ignoring `skills` + `src.orig` is what keeps the gate green. Never re-add `src.orig/` to lint/tsc. |
+| `playwright.config.ts` | `playwright 1.55.1` (`@playwright/test 1.55.1` chromium, `webServer` → `pnpm exec vite --port 5173 --host 127.0.0.1 --strictPort`) | `testDir: e2e`, `baseURL: http://localhost:5173`, `reuseExistingServer: !CI`, `expect.timeout: 15s`, `trace/video on failure`. Stale until rewritten (see §2). |
+| `e2e/` | 20 tests — `smoke.spec.ts` (7), `navigation.spec.ts` (5), `what-to-see.spec.ts` (4), `give-faq.spec.ts` (4) + `helpers.ts` | **STALE** — assert Rother hashes/routes. Useful as template for Bukit Timah rewrite, not as a gate. |
+| `.github/workflows/ci.yml` | CI: lint → typecheck → test → test:e2e (chromium) → build + artifacts | `pnpm 11`, `node 24`. Will fail on `test:e2e` until specs are rewritten — see §11. |
+| `src/index.css` | `@import "tailwindcss"` + `@theme` (24 colors + 2 shadows) + `@layer base/utilities` (13 incl. `hero-ken-burns`, `gold-rule`/`gold-rule-left`, `reveal`/`reveal-visible`, `skip-link`, `mask-fade-b` + keyframes `gold-rule-draw`/`hero-ken-burns`) | Only token source; no `tailwind.config.*` exists. |
+| `index.html` | `lang en`, `viewport`, `meta description`, scoped `Content-Security-Policy` meta + `referrer` meta, data-URI SVG favicon, preconnect `fonts.googleapis.com`, `Fraunces`+`Source Sans 3`, `#root` + `src/main.tsx` | CSP allows inline script/style (singlefile), Google Fonts, `img-src` `upload.wikimedia.org` + `images.pexels.com` + `self`/`data:`/`blob:`, `frame-src https://www.google.com` (maps embed). OG tags for St Joseph's Church (Bukit Timah). |
+| `.gitignore` | Ignores `node_modules/`, `.next/`, `dist/`, `skills/` + `nohup.out`, `.venv`, `bak.git/` | `skills/` ignore is ineffective for tracked files — `skills/` **is** committed (vendored). `src.orig/` is also committed but eslint/tsc ignored. |
+
+**Env vars:** None. `VITE_*` prefix convention applies if added; guard with `src/env.d.ts` (`import.meta.env`). Document new vars in `README.md` + `CLAUDE.md` + this §.
+
+---
+
+## 4. The Design System (Code-First)
+
+**Single source:** `src/index.css` `@theme` block. No `tailwind.config.*`. Tokens are **unchanged from the rothershrine line** — only the imagery and copy they frame is now Bukit Timah.
+
+### 4.1 Tokens (`@theme`)
+
+```css
+@theme {
+  --font-display: "Fraunces", "Iowan Old Style", serif;
+  --font-sans: "Source Sans 3", system-ui, sans-serif;
+  --font-body: var(--font-sans); /* alias */
+
+  --color-shrine-cream: #faf6ec;
+  --color-shrine-parchment: #f2e9d6;
+  --color-shrine-parchment-dark: #e7d9b8;
+  --color-shrine-stone: #dccfae;
+  --color-shrine-ink: #2a2115;
+  --color-shrine-charcoal: #423a2c;
+
+  --color-shrine-maroon-50: #fbf0ee;
+  --color-shrine-maroon-100: #f3d9d4;
+  --color-shrine-maroon-500: #7c2a25;
+  --color-shrine-maroon-600: #691f1e;
+  --color-shrine-maroon-700: #55191a;
+  --color-shrine-maroon-800: #431315;
+  --color-shrine-maroon-900: #33100f;
+  --color-shrine-maroon-950: #200a0a;
+
+  --color-shrine-gold-100: #f8ecd2;
+  --color-shrine-gold-300: #e2bf72;
+  --color-shrine-gold-400: #d1a955;
+  --color-shrine-gold-500: #c3963f;
+  --color-shrine-gold-600: #a67a2e;
+
+  --color-shrine-pine-500: #335840;
+  --color-shrine-pine-600: #26402f;
+  --color-shrine-pine-700: #1c3123;
+
+  --color-shrine-terracotta-400: #c17a53;
+  --color-shrine-terracotta-500: #ab5f3c;
+
+  --shadow-shrine: 0 20px 60px -20px rgba(51, 16, 15, 0.45);
+  --shadow-shrine-lg: 0 40px 90px -30px rgba(51, 16, 15, 0.55);
+}
+```
+
+### 4.2 Typography
+
+| Role | Font | Weights | Tracking | Class / Usage |
+|---|---|---|---|---|
+| Display / Quote | `Fraunces` | 400/500/600/700/800 + italic 500/600 | `tracking-tight` / `[0.25–0.35em]` on eyebrow | `font-display`, `h1–h4` (`@layer base`), hero title |
+| Body | `Source Sans 3` | 400/500/600/700 | `tracking-wide` / `[0.3em]` on eyebrow | `font-sans` (alias `font-body`) on `body`, all `p`/`li` |
+| Eyebrow (light) | — | 600 | `[0.25–0.35em]` | `text-shrine-gold-300 text-xs uppercase` |
+| Eyebrow (dark) | — | 600 | `[0.25em]` | `text-shrine-maroon-500` |
+
+### 4.3 Custom Utilities (`@layer utilities`)
+
+| Name | CSS | Purpose |
+|---|---|---|
+| `.text-balance` | `text-wrap: balance` | Hero + heading line-wrap |
+| `.bg-adobe-texture` | double radial gradient (white 0.06 + black 0.08) | Subtle adobe wash on dark bands |
+| `.bg-grain` | `data:image/svg+xml` turbulence (`opacity 0.035`) | Grain overlay for hero/dark bands |
+| `.divider-weave` | `repeating-linear-gradient(45deg, gold-500 0 6px, maroon-600 6 12px, pine-600 12 18px)` | `Footer` 6px weave strip + pilgrim bands |
+| `.divider-weave-thin` | `repeating-linear-gradient(90deg, gold 0 10px, maroon 10 20, pine 20 30)` height 3px | Thin weave (hero bottom, footer top) |
+| `.gold-rule` | `linear-gradient(90deg, transparent, gold-500 18%, gold-300 50%, gold-500 82%, transparent)` height 1px + `gold-rule-draw` 0.9s | Centered gold rule (section dividers) |
+| `.gold-rule-left` | `linear-gradient(90deg, gold-500, transparent)` height 1px + `gold-rule-draw` 0.9s | Left-aligned gold rule (eyebrow / `SectionHeading` line) |
+| `.hero-ken-burns` | `scale(1)→1.05` 20s ease-out `hero-ken-burns` | Hero image slow zoom |
+| `.mask-fade-b` | `linear-gradient(to bottom, black 70%, transparent)` | Mask for image fades |
+| `.reveal` / `.reveal-visible` | `translateY(24px)→0`, `opacity 0→1`, `0.7s cubic-bezier(0.22,1,0.36,1)` + `prefers-reduced-motion` kill | Scroll-reveal via `Reveal.tsx` + `IntersectionObserver` |
+| `.skip-link` | `fixed z-[100] -translate-y-24 → focus:translate-y-0` | Skip-to-content link (`SkipLink.tsx` + `Layout.tsx`) |
+
+Plus keyframes `gold-rule-draw` (scaleX 0→1) and `hero-ken-burns` — both killed under `prefers-reduced-motion`.
+
+### 4.4 Shadows & Radii
+
+- Shadows: `shadow-shrine` (default) + `shadow-shrine-lg` (elevated cards/dropdowns). Radii are `rounded-sm` (buttons/cards) and `rounded-full` (emblem icon). Don't introduce `shadow-lg`/`rounded-xl` without a rationale.
+
+**Verification:** `grep --color shrine- src/index.css` → 24 colors + 2 shadows (26 theme entries); copy-paste `@theme` into this doc to prevent drift.
+
+---
+
+## 5. Component Architecture & Patterns
+
+### 5.1 Layer Map (SPA — no 5-layer BE model needed)
+
+```
+index.html (#root) → src/main.tsx (StrictMode+createRoot + #root guard)
+  → src/App.tsx (HashRouter + Routes + Layout outlet)
+    → Layout (Header / Outlet / Footer) + scroll/hash restore
+      → Pages (10) → ui/* primitives → utils/cn
+      → data/* (nav + content + site) — single-source, typed
+```
+
+No global store, no API layer, no `server/` — add only with an ADR.
+
+### 5.2 Directory Inventory (32 files in `src/` — 31 ts/tsx + 1 css; no tests, no setup)
+
+```
+src/ (32 files)
+  App.tsx                 # HashRouter + 17 Route entries (16 content paths + * NotFound; 5 alias groups, 7 alias paths)
+  main.tsx                # StrictMode + createRoot + explicit #root guard
+  index.css               # @theme (24 colors + 2 shadows) + @layer base/utilities (13 + 2 keyframes)
+  components/
+    Layout.tsx            # Outlet + hash-aware scroll restoration (double-hash aware, 80ms) + SkipLink
+    Header.tsx            # z-50 fixed maroon-950 bar (translucent + blur when scrolled; transparent at top of Home), useScrolled(16) (default 12), hover+click dropdown, mobile drawer
+    Footer.tsx            # 4-col + divider-weave-thin + SocialIcons + site.ts address/flows
+    PageHero.tsx          # maroon-950 hero (compact?, bg-grain, dual gradients, divider-weave-thin; image alt="" only)
+    SafeImage.tsx         # Wikimedia/Pexels→local fallback (fallback=/images/hero-church.jpg, lazy, onError→dataset.fallback guard) — use for any external image
+    Emblem.tsx            # inline SVG emblem (crook + wheat, currentColor)
+    SkipLink.tsx          # skip-to-#main-content link; preventDefault + imperative focus — never rewrites the hash (HashRouter)
+    SocialIcons.tsx       # hand-drawn Facebook/Instagram glyphs
+    Timeline.tsx          # left rail (border-l) + Reveal per entry — now fed 1845–2017 parish milestones
+    ui/
+      Button.tsx          # discriminated union (to/href/button) + icon, 4 variants
+      Container.tsx       # max-w-7xl mx-auto px-5 sm:px-8
+      SectionHeading.tsx  # eyebrow? / title / description + align/light + line (gold-rule-left)
+      Accordion.tsx       # FAQ accordion (aria-expanded, grid-rows animation, Plus rotate-45)
+      Reveal.tsx          # IntersectionObserver fade+slide (threshold 0.15, fallback visible, prefers-reduced-motion)
+  hooks/
+    useScrolled.ts        # scrollY > threshold boolean (threshold=12 default; Header passes 16)
+  pages/                  # Home, About, History, Worship, Ministries, NewsEvents, Serve, Give, FAQ, NotFound (10 pages, all named exports)
+  data/
+    nav.ts                # primaryNav (6 + description on children) / footerNav (10)
+    content.ts            # 8 interfaces + 10 exports (~476 lines) + images export (11 keys, 3 CDN)
+    site.ts               # site as const — name/shortName/chineseName/tagline/vision + address + hours(5) + mass(7) + contact + transport + feast + uen/chequePayee/facebook/archdiocese/mapsUrl/mapsEmbedSrc — single source
+  utils/
+    cn.ts                 # twMerge(clsx) + cn helper
+  # no src/test — removed pending rewrite; src.orig/test is reference only (6 files / 29 tests)
+```
+
+**Counts:** `find src -type f | wc -l` → 32; `public/images/` → 8 files (`hero-church.jpg`, `chapel-interior.jpg`, `sanctuary.jpg`, `rosary-garden.jpg`, `stained-glass.jpg`, `parish-hall.jpg`, `cemetery.jpg`, `feast.jpg`) → `dist/images/` on build (not inlined).
+
+### 5.3 Client vs Server
+
+**All components are client components.** No RSC, no `use server`. SPA mental model: React 19 hooks (`useState`/`useEffect`/`useLocation`) only; no `createServerFn`.
+
+### 5.4 Routing Contract (`src/App.tsx`)
+
+**17 `Route` entries = 16 content paths + `*` NotFound, covering 10 page components, with 7 alias paths in 5 groups and hash anchors on two pages.**
+
+```tsx
+// src/App.tsx — 17 entries (16 paths + *)
+// HashRouter is intentional: static GH Pages/S3 with no SPA fallback.
+import { HashRouter, Route, Routes } from "react-router-dom";
+import { Layout } from "@/components/Layout";
+import { Home } from "@/pages/Home";
+import { About } from "@/pages/About";
+import { History } from "@/pages/History";
+import { Worship } from "@/pages/Worship";
+import { Ministries } from "@/pages/Ministries";
+import { NewsEvents } from "@/pages/NewsEvents";
+import { Serve } from "@/pages/Serve";
+import { Give } from "@/pages/Give";
+import { FAQ } from "@/pages/FAQ";
+import { NotFound } from "@/pages/NotFound";
+
+export default function App() {
+  return (
+    <HashRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route index element={<Home />} />                          {/* / */}
+          <Route path="/about" element={<About />} />                 {/* canonical — orig was /about-blessed-stanley-rother */}
+          <Route path="/history" element={<History />} />
+          <Route path="/worship" element={<Worship />} />             {/* canonical for 3 aliases */}
+          <Route path="/mass-times" element={<Worship />} />          {/* aliasOf /worship */}
+          <Route path="/hours-location" element={<Worship />} />      {/* aliasOf /worship (was Pilgrimage in orig) */}
+          <Route path="/visit" element={<Worship />} />               {/* aliasOf /worship (was Pilgrimage in orig) */}
+          <Route path="/ministries" element={<Ministries />} />       {/* canonical for 1 alias — replaces /what-to-see */}
+          <Route path="/ministry" element={<Ministries />} />         {/* aliasOf /ministries */}
+          <Route path="/news-events" element={<NewsEvents />} />      {/* canonical for 1 alias */}
+          <Route path="/news-and-events" element={<NewsEvents />} />  {/* aliasOf /news-events */}
+          <Route path="/serve" element={<Serve />} />                 {/* canonical for 1 alias — replaces /volunteer alone */}
+          <Route path="/volunteer" element={<Serve />} />             {/* aliasOf /serve */}
+          <Route path="/give" element={<Give />} />                   {/* canonical for 1 alias */}
+          <Route path="/donate" element={<Give />} />                 {/* aliasOf /give (was /shrinegift in orig) */}
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+      </Routes>
+    </HashRouter>
+  );
+}
+```
+
+**Alias groups (5):**
+
+| Canonical | Aliases | Origin |
+|---|---|---|
+| `/worship` | `/mass-times`, `/hours-location`, `/visit` | `/mass-times` is new; `/hours-location`+`/visit` moved from `Pilgrimage` (orig) |
+| `/ministries` | `/ministry` | Replaces `/what-to-see` + `/grounds-art-architecture` (orig) |
+| `/news-events` | `/news-and-events` | Unchanged |
+| `/serve` | `/volunteer` | `/serve` is new canonical; orig had `/volunteer` alone |
+| `/give` | `/donate` | Replaces `/shrinegift` (orig) |
+
+**Canonical flip:** `/about` is now canonical (orig: `/about-blessed-stanley-rother` canonical, `/about` was the alias).
+
+**Hash anchors:**
+
+| Route | IDs | Nav wiring | Notes |
+|---|---|---|---|
+| `/worship` | `#mass`, `#confession`, `#visit` | `primaryNav → /worship#mass` / `#confession` / `#visit` + `footerNav → /worship#mass` | 3 sections: Mass schedule, Confession & Adoration, Find Us (map). Each `section id="…"` has `scroll-mt-28`. |
+| `/ministries` | `#liturgical`, `#faith-formation`, `#pastoral-care`, `#family-life`, `#youth`, `#mandarin` | `primaryNav → 3` of them; `footerNav → 3`; **Ministries jump nav** `ministries.map → <Link to="/ministries#<id>">` (6 pills, `aria-label="Jump to ministry"`, alternating `bg-shrine-cream`/`bg-shrine-parchment`) | Must use `<Link to="/ministries#id">`, never `<a href="#id">` — plain href would replace the HashRouter hash and route to NotFound. |
+| `/serve` | *(none)* | No section ids — `serveRoles`/`devotions` rendered without anchors | |
+| *(orig)* | ~~`#pilgrim-center`/`#shrine-church`/`#tepeyac-hill`~~ | Gone — predecessor `WhatToSee` anchors removed | See Appendix D |
+
+**Rule:** When adding a route, add its alias if external parish/school links or printed material expects it. Keep `Layout.tsx` hash logic intact — it resolves the anchor from `useLocation().hash` or the double-hash `window.location.hash`, then `getElementById` + `scrollIntoView({smooth})` (80ms) with fallback `window.scrollTo(0,0)`.
+
+### 5.5 Component Conventions
+
+| Primitive | File | API | Rule |
+|---|---|---|---|
+| `Button` | `src/components/ui/Button.tsx` | discriminated `to` (Link) / `href` (a) / native `button` + `variant`, `icon?`, `className?` | `to`→`<Link>`, `href`→`<a>`, else `<button>`; `variantClasses` + `cn()` + focus ring |
+| `Container` | `src/components/ui/Container.tsx` | `children, className?` | All sections wrap in `<Container>` |
+| `SectionHeading` | `src/components/ui/SectionHeading.tsx` | `eyebrow?, title, description?, align?, light?` | Eyebrow renders `gold-rule-left` line + gold/maroon; light = gold/cream on dark |
+| `PageHero` | `src/components/PageHero.tsx` | `eyebrow, title, description?, image, children?, compact?` | `compact` shrinks padding; `bg-grain` + dual gradients; `alt=""` |
+| `SafeImage` | `src/components/SafeImage.tsx` | `src, fallback?, alt, className?, loading?` (`fallback` default `/images/hero-church.jpg`, `loading` default `lazy`) | Wraps `<img>` with `onError→dataset.fallback` guard to swap `src` once; always via `cn()`. Use for any Wikimedia/Pexels CDN or external image; don't use bare `<img>` for CDN sources. CDN allowlist: `upload.wikimedia.org`, `images.pexels.com`. |
+| `Header` | `src/components/Header.tsx` | `useScrolled(16)` (default 12) + `mobileOpen`, `openDesktopMenu` | Fixed maroon-950 bar (`maroon-950/92` + blur when scrolled; transparent at top of Home); `aria-haspopup`/`aria-expanded` on dropdown trigger; close on `location.pathname` change; threshold 16 delays transparent→solid switch on Home (intentional vs default 12) |
+| `Reveal` | `src/components/ui/Reveal.tsx` | `children, delay?, as?: "div"│"li", className?` | `IntersectionObserver` 0.15 threshold; falls back visible if unsupported; respects `prefers-reduced-motion` |
+| `Accordion` | `src/components/ui/Accordion.tsx` | `items: {question,answer}[]` | Single-open, `grid-rows` animation, `Plus rotate-45` — used by `FAQ.tsx` for `faqs[6]` |
+| `Emblem` / `SkipLink` / `Timeline` | `src/components/*` | see files | `Emblem` is inline SVG; `SkipLink` targets `#main-content` via preventDefault + imperative focus (never rewrites the hash); `Timeline` is a left rail (border-l) with Reveal per entry — now shows 1845–2017 hill milestones |
+| `cn` | `src/utils/cn.ts` | `cn(...ClassValue[])` | Only merge path — `twMerge(clsx(...))` |
+
+---
+
+## 6. Custom Hooks Deep Dive
+
+**Status: One hook — `useScrolled`.**
+
+Extracted from `Header.tsx` into `src/hooks/useScrolled.ts` so `Header` stays declarative. Before the elevation there were zero hooks; this is the first `src/hooks/` file.
+
+**Contract:**
+
+```ts
+// src/hooks/useScrolled.ts
+import { useEffect, useState } from "react";
+export function useScrolled(threshold = 12) {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > threshold);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [threshold]);
+  return scrolled;
+}
+```
+
+- `Header.tsx` calls `useScrolled(16)` — the 16 vs default-12 mismatch is intentional (delays transparent→solid on Home). Don't "fix" it.
+- SSR-safe by construction (`window` only inside `useEffect`).
+
+**When you add one:**
+
+- Location: `src/hooks/useThing.ts` (`camelCase`, `use` prefix).
+- Must be SSR-safe even in an SPA (guard `window` access): `useEffect` for scroll/listeners, `useState` initial `false`.
+- Cleanup: return a remover in `useEffect` (e.g., `removeEventListener`, `clearTimeout`).
+
+---
+
+## 7. Content Management & Data Ingestion
+
+**No CMS, no RSS, no API.** Pure file-backed content — the simplest thing that works. `src/data/content.ts` is the data layer; `src/data/site.ts` is the canonical fact single-source; `src/data/nav.ts` is the navigation single-source. Pages render from data — don't inline copy.
+
+### 7.1 Data Files — Complete Inventory
+
+| File | Exports | Count / Shape | Consumer |
+|---|---|---|---|
+| `src/data/content.ts` | `lifeTimeline: TimelineEntry[]` | **8** — `1845–2017` Singapore mission (see §7.2) | `History.tsx`, `About.tsx`, `Timeline.tsx` |
+|  | `grounds: GroundsPlace[]` | **3** — `main-church`, `chapel`, `rosary-garden` (+ `image`/`imageFallback`/`imageAlt`) — replaces orig `whatToSee[3]` | `Home.tsx` (grounds preview) |
+|  | `ministries: Ministry[]` | **6** — `liturgical`, `faith-formation`, `pastoral-care`, `family-life`, `youth`, `mandarin` (each + `image`/`imageFallback`/`imageAlt`) | `Ministries.tsx` (jump nav + 6 alternating sections) |
+|  | `faqs: FaqItem[]` | **6** — Mass, confession, MRT/buses + gates, feast 1 May, baptism/marriage/Mass intention, cemetery/columbarium | `FAQ.tsx` (`Accordion`) |
+|  | `upcomingEvents: EventItem[]` | **6** — `title`+`date`+`summary`+`category` + optional `href` (categories `Parish`\|`Devotion`\|`Formation`\|`Archdiocese`) | `NewsEvents.tsx`, `Home.tsx` |
+|  | `givingOptions: GivingOption[]` | **8** — PayNow UEN T08CC4043C, weekend collections/4th-Sunday Maintenance, cash boxes, cheque, SSVP–Friends in Need, GIFT, Boys' Town (late Aug, Brother Emmanuel), Mass offerings (icons `globe`/`church`/`landmark`/`book`/`hand-heart`/`flame`/`sprout`/`heart`) | `Give.tsx` |
+|  | `priests: Priest[]` | **3** — Jovita Cyprian Ho (Parish Priest, +65 6760 0052), Leo Justin Chinnappan HGN (Assistant, +65 6760 4636), Dominic Yeo-Koh (Religious ex-officio) | `About.tsx` |
+|  | `ppcMembers: PpcMember[]` | **16** — 3 ex-officio clergy + 13 appointed/elected PPC (Chairman Gabriel Lok, Advisor Dominic Soh, etc.) | `About.tsx` |
+|  | `serveRoles` (untyped const) | **4** — Liturgical ministers, Catechists & facilitators, Pastoral care, Hospitality & grounds | `Serve.tsx` |
+|  | `devotions` (untyped const) | **6** — Mass in Honour of St Joseph (1st Wed 7.30/8.00 Main Church), First Friday Mass & Holy Hour, Holy Hour for Vocations (3rd Thu Chapel + SFXMS seminarians), Children's Mass (2nd Sats term 5.30), Divine Mercy (Fridays 8.00 except 1st Fri, Chapel), Adoration (Tuesdays 8.00 Adoration Room) | `Serve.tsx`, `Worship.tsx` |
+|  | `images` (`as const`) | **11 keys** — `hero` (Wikimedia 2025 front view), `heroFallback` `/images/hero-church.jpg`, `chapel`/`sanctuary`/`garden`/`glass`/`hall`/`cemetery`/`feast` (local), `naveCdn`/`courtyardCdn` (Pexels). CDN count **3** on 2 hosts (`upload.wikimedia.org` + `images.pexels.com`) | `Home.tsx`, `PageHero`, `SafeImage` fallbacks |
+| `src/data/nav.ts` | `primaryNav: NavItem[]` | **6** — Home, About(3 children), Worship(3 children with hash), Ministries(3 children with hash), News & Events, Serve. Children carry `description`. | `Header.tsx` |
+|  | `footerNav: NavLink[]` | **10** — The Parish, Mass Times, History, FAQ, Liturgical, Faith Formation, Pastoral Care, News & Events, Serve, Give | `Footer.tsx` |
+| `src/data/site.ts` | `site: { as const }` | **1 canonical object** — `name`/`shortName`/`chineseName`/`tagline`/`vision` + `address` (street/city/zip + `full`/`query` getters) + `hours` (5: `gates`/`mainChurch`/`chapel`/`bookshop`/`adorationRoom`) + `mass` (7: `weekdayMorning`/`weekdayEvening`/`saturday`/`sunday[4]`/`confession`/`adoration`/`secondCollection`) + `contact` (3 phones) + `transport` (mrt + buses) + `feast` (St Joseph the Worker, 1 May) + `uen`/`chequePayee`/`facebook`/`archdiocese`/`mapsUrl`/`mapsEmbedSrc` | `Footer.tsx`, `Worship.tsx`, `About.tsx` — single source; don't duplicate |
+
+**Interfaces:** 8 exported (`TimelineEntry`, `GroundsPlace`, `Ministry`, `FaqItem`, `EventItem`, `GivingOption`, `Priest`, `PpcMember`) — see §20 for verbatim definitions.
+
+### 7.2 Life Timeline — 8 Entries (1845–2017)
+
+| Year | Title | Parish moment |
+|---|---|---|
+| 1845 | A missionary walks inland | Fr Anatole Mauduit M.E.P. arrives from Normandy; seeks Chinese plantation workers beyond the town; founds Kranji River mission station |
+| 1846 | The Kranji Chapel | Attap chapel gathered as Singapore's first Chinese Catholic parish; feast will honour St Joseph the Worker |
+| 1853 | A church on this hill | Palladian portico on six Doric columns at present Upper Bukit Timah site |
+| 1861 | The statue of St Joseph | Patron statue arrives; feast-day pilgrimage takes root |
+| 1910s | Rubber and return | Secret societies/tigers/failing plantations thin the flock; parish rubber brings Christians back; 1930s pilgrimage revival |
+| 1964 | Fr Teng rebuilds | Fr Joachim Teng rebuilds for baby-boom parish (cattle milk, food fair); blessed 30 Aug 1964 by Abp Michel Olçomendy |
+| 1991–97 | Stations, columbarium, hall | Life-sized Stations 1991 (Lenten pilgrimage), columbarium 1995, parish hall 1997 |
+| 2012–17 | Consecration and the Rosary Garden | Consecrated 1 May 2012 (Abp Nicholas Chia); Rosary Garden blessed 25 Mar 2017 (Abp William Goh); Mauduit's headstone among the trees |
+
+*Replaces the orig 1935–2023 Oklahoma/Guatemala martyr timeline (same length, entirely different century/region).*
+
+### 7.3 Other Arrays at a Glance
+
+**`grounds[3]`** — `main-church` (Sunset Sat 5.30 + Sun 7.30 Mandarin / 9.30/11.30/5.30 English + Children's Mass 2nd Sats), `chapel` (Mon–Sat 6.30 a.m., Mon–Fri 6.30 p.m., First Friday, Divine Mercy Fri 8.00), `rosary-garden` (2017 trail + 1991 Stations + Mauduit headstone + last Catholic church cemetery). Each has `image` + `imageFallback` + `imageAlt`; replaces `whatToSee` pill-plus-detail pattern.
+
+**`ministries[6]`** — `liturgical` (servers/Sunset Choir/Little Praisers/hospitality), `faith-formation` (Good Shepherd ages 3–12, Sat/Sun N2–K2, adult/RCIA), `pastoral-care` (SSVP St Joachim, Legion of Mary Mon/Wed, PIETA 4th Tue), `family-life` (seniors + neighbourhood SCCs), `youth` (Sun 12.45–3.30 St Mary's AVA + Alpha Youth/SAHOP, coordinator Leonard Ong), `mandarin` (Sun 7.30 Mandarin Mass + Teochew/Bible/Rock/Legion). Each drives one alternating `bg-shrine-cream`/`bg-shrine-parchment` section in `Ministries.tsx`.
+
+**`faqs[6]`** — Mass times, confession (15 min before weekend Masses, open foyer), how to get there (Cashew MRT + buses + gates 8–9), feast 1 May + food fair, baptism/marriage/Mass intention, cemetery/columbarium.
+
+**`upcomingEvents[6]`** — `title`+`date`+`summary`+`category` + optional `href` (only one currently: Youth "An Encounter with Jesus" → `tinyurl.com/54rbyjyr`). Shape lost orig's `location` field, gained `href`. Categories `Parish`/`Devotion`/`Formation`/`Archdiocese` (orig: `Feast`/`Pilgrimage`/`Formation`/`Community`).
+
+**`givingOptions[8]`** — Same count, entirely new names: PayNow, Weekend collections, Cash boxes, Cheque, SSVP–Friends in Need, GIFT (Archdiocese/Catholic Foundation), Boys' Town (Brother Emmanuel, late Aug), Mass offerings. Replaces orig General Fund/Pipe Organ/Tepeyac Hill/Apla's Circle/Education/Hospitality/Shrine Church/Guatemala Mission.
+
+### 7.4 How to Add Content
+
+**Add a timeline entry:**
+
+1. Append to `lifeTimeline` in `src/data/content.ts` with `{ year, title, description }`.
+2. Re-run `pnpm typecheck` (type gate).
+3. No page change — `History.tsx` maps the array via `Timeline.tsx`.
+
+**Add a ministry:**
+
+1. Append to `ministries` with `{ id, title, summary, details[], image, imageFallback, imageAlt }` — `id` becomes the hash anchor (`/ministries#<id>`).
+2. Verify `Ministries.tsx` jump nav (`ministries.map → <Link to="/ministries#id">`) picks it up automatically.
+3. Run `pnpm typecheck && pnpm build`.
+
+**Add a nav item:**
+
+1. Append to `primaryNav` or `footerNav` in `src/data/nav.ts` (include `description` for dropdown children).
+2. If routed, add `<Route path="…">` in `src/App.tsx` — include an alias if a legacy/external path expects it.
+3. Verify `Header` hover dropdown + mobile drawer render the child.
+
+**Why no `import.meta.glob`:** Vite glob is for file-system content collections (e.g., Astro). This is a typed-array SPA — direct export + import is simpler and fully type-checked. For a future CMS, isolate behind `src/lib/cms/` and keep `content.ts` as fallback.
+
+---
+
+## 8. Accessibility (WCAG AAA) Implementation
+
+**Target:** WCAG AAA intent — this section documents the contract, not a certification claim. Verify with `axe-core` / Lighthouse a11y before claiming pass.
+
+### 8.1 Contrast (body text)
+
+| Foreground | Background | Ratio | Level |
+|---|---|---|---|
+| `shrine-ink #2a2115` | `shrine-cream #faf6ec` | ~13:1 | AAA |
+| `shrine-charcoal #423a2c` | `shrine-cream` | ~10:1 | AAA |
+| `shrine-cream #faf6ec` | `shrine-maroon-900 #33100f` | ~13:1 | AAA |
+| `shrine-gold-300 #e2bf72` | `shrine-maroon-900` | ~7:1 | AAA |
+
+Verify new pairings with a contrast checker before merging.
+
+### 8.2 Focus & Navigation
+
+- **Focus ring:** `focus-visible:outline` via Tailwind defaults; `src/index.css` `@layer base` sets `outline: 2px solid --color-shrine-gold-500` + `offset 3px` for `:focus-visible`. Preserve on `Button` and `Header` toggle. Do not remove outlines.
+- **Header toggle:** `aria-label` toggles `Open menu`/`Close menu`, `aria-expanded` reflects `mobileOpen`. Keep both.
+- **Dropdowns:** Hover-open (`onMouseEnter`/`onMouseLeave` on `primaryNav` children). If converting to click-open, add `aria-haspopup="true"` + focus-trap + `Escape` close.
+- **Skip-to-content:** Implemented — `SkipLink.tsx` renders `<a href="#main-content">` first in `Layout`. Under HashRouter the component **must not** let the browser follow the href (the hash is the route): `onClick` `preventDefault`s and imperatively focuses `#main-content` (`<main id="main-content">` in `Layout`). Contract previously enforced by `SkipLink.test.tsx` (now in `src.orig/` only); rewrite that test when restoring unit tests. Also covered (stale) in `e2e/navigation.spec.ts`.
+- **Landmarks:** `header`/`main`/`footer` present via `Layout`; every page's `PageHero` is `section` with heading hierarchy `h1 → h2`. Each ministry section in `Ministries.tsx` has `aria-labelledby` pointing to its `h2`.
+
+### 8.3 Images & Media
+
+- Decorative hero overlays (`PageHero` image): `alt=""` + `aria-hidden="true"`; `PageHero` also renders `bg-grain` + dual gradients over the image for contrast.
+- Content images (`grounds` cards, `ministries` sections, Home): `imageAlt` is required — `GroundsPlace.imageAlt` and `Ministry.imageAlt` enforce it (see §20). `SafeImage` passes it through.
+- Icon-only links: each `lucide-react` icon has `aria-hidden="true"` and the anchor has `aria-label`.
+- Ministries jump nav pills: `aria-label="Jump to ministry"` on each `<Link>`.
+
+### 8.4 Motion
+
+- `html { scroll-behavior: smooth }` in `src/index.css`. Honor `prefers-reduced-motion`:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; }
+}
+```
+
+- `src/index.css` already kills `.reveal` (opacity/transform) and `.hero-ken-burns` under `prefers-reduced-motion: reduce`, and `Reveal.tsx` falls back visible if `IntersectionObserver` is unsupported.
+
+---
+
+## 9. Anti-Patterns & Common Bugs
+
+Each entry: symptom → root cause → fix → lesson. Severity: `Critical` (breaks deploy/route) / `High` (breaks type/build) / `Medium` (visual/contrast) / `Low` (nit).
+
+| # | Anti-Pattern (Severity) | Symptom | Root Cause | Fix | Lesson |
+|---|---|---|---|---|---|
+| 1 | **HashRouter → BrowserRouter** (Critical) | Deep-link 404 on GH Pages/S3 refresh | Static host has no fallback rewrites | Stay on `HashRouter`; if `BrowserRouter` is required, add `404.html` redirect shim | Static deploy = hash routing |
+| 2 | **Breaking alias routes** (Critical) | Parish/school inbound links 404; `/#/visit` or `/#/donate` blank | Removed `path="mass-times"` / `"hours-location"` / `"visit"` / `"ministry"` / `"donate"` / `"volunteer"` / `"news-and-events"` alias | Keep alias routes in `App.tsx` or add explicit redirect; there are **7 aliases in 5 groups** | Alias routes are part of the contract (§5.4) |
+| 3 | **Assumed code-splitting** (Critical) | `viteSingleFile` warnings / missing chunks | Dynamic `import()` expects chunks, but `singlefile` inlines all | Avoid `import()` splits unless removing `singlefile`; verify `dist/index.html` is one file | Build plugin dictates import style |
+| 4 | **Arbitrary hex color** (High) | Token drift, contrast regression | Used `bg-[#691f1e]` instead of `bg-shrine-maroon-600` | Use `shrine-*` token from `@theme` | Only `@theme` is the palette |
+| 5 | **`@` alias desync** (High) | `Cannot find module '@/...'` | Changed `vite.config.ts` alias without `tsconfig.json` `paths` (or vice versa) | Update both files; restart dev server | Alias is a two-file contract |
+| 6 | **Bypassing `cn()`** (High) | Duplicated/conflicting Tailwind classes not deduped | Used `` `px-3 ${cond? "px-6":""}` `` | Always `cn("px-3", cond && "px-6")` | `twMerge` is the only path |
+| 7 | **Stale `include`** (High) | File not type-checked | Added file outside `src/` but didn't expand `tsconfig.json` `include` | Add path to `include` (currently `["src","vite.config.ts"]`) | `include` is the type boundary |
+| 8 | **`noUnusedLocals` breach** (Medium) | `tsc --noEmit` fails on unused import/var | Left placeholder imports/params after refactor | Remove or prefix deliberately unused param with `_` (`_idx`) | Strict flags are the gate |
+| 9 | **Runtime font loader** (Medium) | FOIT + duplicate load | Imported fonts in JS instead of `index.html` | Fonts belong in `index.html` + `@theme`; no JS loader | One font source of truth |
+| 10 | **Missing `imageAlt`** (Medium) | Empty alt on content image | Added `GroundsPlace`/`Ministry` without `imageAlt` | `imageAlt` is required — fill it | Content interface enforces a11y (§20) |
+| 11 | **Plain `<a href="#id">` in HashRouter** (High) | Clicking a ministry pill routes to `NotFound` or loses the page | Used `<a href="#liturgical">` instead of `<Link to="/ministries#liturgical">` — plain href replaces the HashRouter hash | Always `<Link to="/ministries#id">` and `<Link to="/worship#id">` for hash anchors (see §5.4) | Hash is the route |
+| 12 | **Lost `aria-expanded`** (Low) | Screen reader can't tell drawer state | Refactored `Header` toggle without `aria-expanded` | Keep `aria-expanded={mobileOpen}` + `aria-label` toggle | A11y props are functional |
+| 13 | **Wrong `SafeImage` fallback** (Medium) | Broken hero on Wikimedia/Pexels failure shows shrine fallback | Used old `fallback="/images/hero-shrine.jpg"` (Rother path) instead of `"/images/hero-church.jpg"` | Default fallback is `/images/hero-church.jpg` — verify `src/components/SafeImage.tsx` default | CDN → local discipline (§5.5) |
+
+---
+
+## 10. Debugging Guide
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `pnpm dev` → `EADDRINUSE :5173` | Port in use | `pnpm dev -- --port 5174` or `lsof -i:5173` then kill |
+| `Cannot find module '@/utils/cn'` | Alias desync (see §9 #5) | Align `vite.config.ts` ↔ `tsconfig.json` `paths @/*` (`baseUrl:"."`) — change both; restart Vite |
+| `npx tsc --noEmit` → `TS6133 'x' is declared but never used` | `noUnusedLocals`/`Params` (`strict` + `noUnusedLocals:true` `noUnusedParameters:true`) | Remove import or use it; for intentionally unused param, prefix `_` (e.g., `_idx`) |
+| `pnpm test` → "no test files found" | Expected — `src/` has 0 tests (hollow harness) | Don't add `--passWithNoTests` workarounds; rewrite tests when ready (template in `src.orig/test/`) |
+| `pnpm test:e2e` → failures on `#pilgrim-center`, `/what-to-see`, `Apla's Circle` | Stale Rother-era `e2e/` (see §2) — not a regression | Rewrite `e2e/what-to-see.spec.ts` → `e2e/ministries.spec.ts` etc. for `/worship`/`/ministries` + new anchors; don't run as gate until then |
+| Hash anchor lands at top (`/#/worship#mass` or `/#/ministries#liturgical`) | Target `id` missing or `Layout` effect stale | Verify `id="mass"` in `Worship.tsx` and `id="liturgical"` in `Ministries.tsx`; check `Layout` `useEffect` deps `[pathname, hash]`; jump nav must be `<Link to="/ministries#id">` (not plain `<a href="#id">`, see §9 #11) |
+| Double-hash `#/ministries#liturgical` doesn't scroll | `Layout` `resolveAnchor` not matching `pathname` | Verify `resolveAnchor` splits `window.location.hash` on `#`, filters, strips leading `/`, and compares against `pathname.replace(/^\//,"")` — the `cleaned === pathname…` guard prevents false anchors |
+| `pnpm build` → `dist/index.html` missing or not inlined | `viteSingleFile` misordered or removed | Verify `plugins: [react(), tailwindcss(), viteSingleFile()]` order; check `dist/index.html` exists and `Inlining: index-*.js` in log; `dist/images/` alongside is expected (publicDir copy) |
+| Styles missing locally but build works | `@import "tailwindcss"` order wrong | `@import` must be first line of `src/index.css` |
+| Fonts not loading | `index.html` preconnect or href typo | Verify `fonts.googleapis.com` preconnect + `Fraunces`/`Source Sans 3` href intact; no JS font loader |
+| GH Pages deep-link 404 on refresh | Switched to `BrowserRouter` | Revert to `HashRouter` or add `404.html` SPA redirect |
+| Image 404 (`/images/hero-church.jpg`) or Wikimedia/Pexels CDN fails | Wrong public path / missing `dist/images/` on deploy / CDN blocked / old shrine fallback | Hero/fallback belong in `public/images/` and referenced as `/images/…` (absolute from root; Vite copies to `dist/images/` — upload alongside `index.html`); CDN URLs (`images.hero` Wikimedia + `naveCdn`/`courtyardCdn` Pexels in `content.ts`) must use `SafeImage` (`fallback` default `/images/hero-church.jpg` + `dataset.fallback` guard + `loading="lazy"` default) — don't use bare `<img>` for CDN sources. Upload count: **8 files** in `public/images/` |
+| `tests` not found or `e2e` leaking into vitest | `test.include`/`exclude` misconfigured | Currently `vite.config.ts` has no `test` block — vitest defaults (`**/*.{test,spec}.*`) apply; `src/` has no tests so nothing runs. If restoring tests, re-add `test: { globals, jsdom, setupFiles: ["src/test/setup.ts"], include: ["src/**/*.{test,spec}.{ts,tsx}"], exclude: ["e2e/**", …] }` |
+| `vite.config.ts` `server.watch` `ENOSPC` on `pnpm dev` | Vendored `skills/` tree (large `.venv`) watched without ignore | Re-add `server.watch.ignored: ["**/skills/**","**/dist/**","**/playwright-report/**","**/test-results/**","**/coverage/**"]` |
+| `tsconfig.json` errors on `eslint.config.js` or `playwright.config.ts` | Added those files to `include` without installing their types | Current `include` is `["src","vite.config.ts"]` only (intentional). If expanding, add `eslint.config.js`/`playwright.config.ts` deliberately and adjust `types`. |
+
+**Live-site verification (post-deploy — Bukit Timah routes):**
+
+```bash
+pnpm build && pnpm preview  # :4173
+# Click through every primaryNav item + all hash anchors:
+# /  /about  /history  /worship  /ministries  /news-events  /serve  /give  /faq
+# /mass-times (→ Worship)  /hours-location (→ Worship)  /visit (→ Worship)
+# /ministry (→ Ministries)  /news-and-events (→ NewsEvents)  /volunteer (→ Serve)  /donate (→ Give)
+# /worship#mass  /worship#confession  /worship#visit
+# /ministries#liturgical  #faith-formation  #pastoral-care  #family-life  #youth  #mandarin
+# Direct: /#/worship#mass  and  /#/ministries#liturgical  → should land on-section
+# Refresh on /#/ministries#youth → stays on-section (HashRouter)
+# /does-not-exist → NotFound
+```
+
+---
+
+## 11. Pre-Ship Checklist
+
+Run in order — every step must be green before pushing `main` (`main` is the deploy branch).
+
+```bash
+pnpm lint                      # 1 — eslint 9.39.5 flat --max-warnings 0
+pnpm typecheck                 # 2 — tsc --noEmit (strict + noUnusedLocals/Params + noFallthroughCasesInSwitch)
+pnpm test                      # 3 — vitest 3.2.6 jsdom — 0 tests (hollow, exits 0) — skip as gate until rewritten
+pnpm test:e2e                  # 4 — playwright 1.55.1 chromium — 20 tests STALE (expect failure) — skip as gate until rewritten
+pnpm build                     # 5 — singlefile 2.3.3 build → dist/index.html (JS+CSS inlined) + dist/images/ (8 files, copied not inlined)
+pnpm preview &                 # 6 — smoke: spot-check 10 routes + 7 alias paths + 9 hash anchors (3 on /worship + 6 on /ministries)
+ls -lh dist/                   # 7 — confirm dist/index.html + dist/images/ (8 files) — publicDir copy expected, not inlined
+# 8 — axe/Lighthouse a11y spot-check on Header + Home hero + FAQ + Worship#visit map
+git push origin main           # 9 — deploy (GH Pages / S3 upload of dist/index.html + dist/images/)
+```
+
+| Category | Check | How |
+|---|---|---|
+| Lint | `pnpm lint` clean | `eslint 9.39.5` flat `eslint . --max-warnings 0` (`typescript-eslint 8.28.0` + `react-hooks 5.2.0`) — ignores `skills` + `src.orig` |
+| Types | `pnpm typecheck` (`npx tsc --noEmit`) clean | `strict` + `noUnusedLocals`/`noUnusedParameters`/`noFallthroughCasesInSwitch`/`isolatedModules`/`noEmit` pass; `tsconfig.json` `include` covers `src` + `vite.config.ts` only |
+| Tests | `pnpm test` — 0 passed (0 files) | Hollow — `src/test/` deleted, `vitest` defaults apply, exits 0. Re-add `src/test/setup.ts` + `test.include/exclude` when restoring. Reference: `src.orig/test/` (6 files/29 tests). |
+| E2E | `pnpm test:e2e` — 20 stale (4 specs) | **Do not gate on this until rewritten.** Stale specs: `smoke.spec.ts` (7), `navigation.spec.ts` (5), `what-to-see.spec.ts` (4), `give-faq.spec.ts` (4) — all assert Rother routes/hashes/content. Rewrite to cover `/worship`/`/ministries`/`/serve`/`/give` + Bukit Timah copy before re-enabling `pnpm test:e2e` in CI. `playwright.config.ts` `expect.timeout: 15s` + `webServer` → `pnpm exec vite` still applies. |
+| Build | `pnpm build` greens | `viteSingleFile 2.3.3` inlines JS + CSS; `dist/images/` 8 files copied (not inlined) — verify one-file `dist/index.html` |
+| Routes | All 10 pages + 7 alias paths + 9 hash anchors navigate (HashRouter) | Manual or `agent-browser` smoke (`Layout` double-hash aware `#/ministries#id` → split + 80ms `scrollIntoView`) |
+| A11y | Contrast ≥4.5:1 on body, `alt` on content images (`SafeImage` fallback), `aria-expanded` on toggle, `SkipLink` hash discipline, `aria-label="Jump to ministry"` | Spot-check per §8 table + `axe-core` on Header/Home hero/FAQ/Worship map |
+| Visual | Hero gradients + `shadow-shrine`/`shadow-shrine-lg` + `divider-weave`/`divider-weave-thin` + `gold-rule`/`gold-rule-left` + `hero-ken-burns` render | Preview comparison — hero is Wikimedia 2025 front view with `hero-church.jpg` fallback |
+| Images | `SafeImage` fallback verified (Wikimedia/Pexels→local) + `public/images/` → `dist/images/` (8 files) on deploy | Block CDN or off-line smoke; check `dist/images/` has 8 files (`hero-church`, `chapel-interior`, `sanctuary`, `rosary-garden`, `stained-glass`, `parish-hall`, `cemetery`, `feast`) |
+| CSP | No console CSP violations | Verify `index.html` CSP: `img-src` includes `upload.wikimedia.org` + `images.pexels.com`, `frame-src` includes `google.com` for maps embed; no `unsafe-eval` |
+| Git | No `dist/`/`node_modules/` committed | `.gitignore` respected (`skills/` + `src.orig/` stay tracked as vendored/frozen reference but ignored by tooling) |
+
+**Current minimum gate (until E2E + unit tests are rewritten):**
+
+```bash
+pnpm lint && pnpm typecheck && pnpm build
+```
+
+Restore the full gate once tests are green:
+
+```bash
+pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build
+```
+
+---
+
+## 12. Lessons Learnt & How to Avoid Them
+
+| # | Lesson | What Happened | Fix / Guard |
+|---|---|---|---|
+| L1 | **Alias routes are a contract, not tech debt** | Both lines considered removing alias paths as "duplicates" (orig: `shrinegift`/`grounds-art-architecture`; now: `mass-times`/`hours-location`/`ministry`/`donate`). Inbound parish/school/programme links + printed QR codes 404'd. | Documented §5.4; **7 aliases in 5 groups** preserved in `App.tsx`. Rule: renaming a canonical path requires keeping the old alias or adding a redirect. |
+| L2 | **No README → this SKILL** | Early project shipped with only `docs/prompts.md`; onboarding required reading 10 files. | Added `README.md` + `AGENTS.md` + `CLAUDE.md`; this file distills all three. Update all four when adding a route/token/image. |
+| L3 | **`@theme` drift is silent** | Arbitrary `bg-[#...]` would compile but evade review. | Enforce `shrine-*` tokens only; grep CI: `rg -n "bg-\[#"` or forbid `amber-`/`slate-` via test. |
+| L4 | **Singlefile dictates imports** | `import()` assumed chunks until `singlefile` warning appeared. | Document §9 #3; verify `dist/index.html` is one file post-build. |
+| L5 | **Strict flags catch real debt** | `noUnusedLocals` surfaced 3 dead imports post-scaffold; port surfaced similar. | Keep `strict` flags on; gate is `tsc --noEmit`. |
+| L6 | **HashRouter vs BrowserRouter is a deploy decision** | Considered `BrowserRouter` for cleaner URLs; would have broken GH Pages/S3 deep-links. | ADR-1 (Appendix A) locks `HashRouter` with `404.html` escape hatch. |
+| L7 | **Content shape = UI shape** | Orig `WhatToSeeSection.imageAlt` was optional in a draft; a11y regression followed. Port `GroundsPlace`/`Ministry` keep `imageAlt` + `imageFallback` required for the same reason. | Required in §20 interfaces; future entries must include both. |
+| L8 | **Hash is the route — `<Link>` not `<a>`** | Ministries jump nav drafted with `<a href="#liturgical">` — would have replaced the HashRouter hash and routed to NotFound. | Fixed to `<Link to="/ministries#id">` in `Ministries.tsx` + Worship children; documented §5.4 / §9 #11. |
+| L9 | **`SafeImage` default drift** | Wikimedia hero (`images.hero`) introduced a new CDN host; old default `/images/hero-shrine.jpg` would have 404'd on fallback. | Updated `SafeImage.tsx` default to `/images/hero-church.jpg`; added `images.heroFallback` + `imageFallback` on every `grounds`/`ministries` entry; CSP extended to `upload.wikimedia.org`. |
+| L10 | **Stale `e2e/` is a trap** | Port kept the 20-test E2E suite verbatim — it asserts `#pilgrim-center`/`#shrine-church`/`#tepeyac-hill` and `/about-blessed-stanley-rother` that no longer exist; CI would fail on the next push. | Marked stale in §2/§11, excluded from the current gate, and documented as rewrite target (`what-to-see.spec.ts` → `ministries.spec.ts`, `pilgrimage` → `worship`). Don't re-enable `test:e2e` in `.github/workflows/ci.yml` until green. |
+| L11 | **`vite.config.ts` has no `test` block — don't assume it does** | Port removed the `test { globals, jsdom, setupFiles, include, exclude }` block when deleting `src/test/`; a naïve "restore `src/test/setup.ts`" without restoring the `test` block would leave vitest misconfigured. | When restoring unit tests, re-add the `test` block + `setupFiles: ["src/test/setup.ts"]` + `include`/`exclude`; and expand `tsconfig.json` `include` + `types` accordingly. See §3.2. |
+| L12 | **Canonical flip: `/about` not `/about-blessed-stanley-rother`** | Port flipped the About canonical (orig: `/about-blessed-stanley-rother` canonical, `/about` alias). Any hard-coded deep link to the old canonical would 404 if the alias were dropped. | Kept only `/about` (no alias needed — the old canonical is intentionally retired for the parish). Document the flip in §5.4 + Appendix D; if old shrine links must survive, add `/about-blessed-stanley-rother` as an alias back to `/about`. |
+
+---
+
+## 13. Pitfalls to Avoid
+
+**Architecture**
+- Don't add SSR/API/`server/` without an ADR — this is a static SPA by design.
+- Don't scatter route tables outside `src/App.tsx` — it is the only route table (17 entries, 5 alias groups).
+- Don't put data arrays outside `src/data/*` — they are the data layer (`content.ts` + `nav.ts` + `site.ts`).
+- Don't reintroduce Rother Shrine content (700 SE 89th St, Tepeyac Hill, Pilgrim Center, Padre Apla's Circle, Oklahoma/Guatemala narratives) — `src.orig/` is frozen reference, not a source to copy from. Hours, Mass, and address are the single source in `site.ts`; don't duplicate them across pages.
+
+**TypeScript**
+- Don't use `any` — use `unknown` + narrowing; `as any` is a last resort with `// ponytail: ceiling…` comment.
+- Don't use `type` for object shapes — prefer `interface` (`type` is for unions).
+- Don't relax `strict` flags to silence errors — fix the code. `noUnusedLocals`/`noUnusedParameters`/`noFallthroughCasesInSwitch`/`isolatedModules`/`noEmit` are the gate.
+- Don't assume `tsconfig.json` includes `eslint.config.js`/`playwright.config.ts` — it doesn't (only `src` + `vite.config.ts`). Don't re-add `src.orig/` to `include`.
+
+**Styling**
+- Don't introduce `amber-400`/`slate-*`/`zinc-*` — forbidden; use `shrine-*`.
+- Don't use arbitrary `bg-[#...]` — extend `@theme`.
+- Don't add `tailwind.config.*` — v4 is CSS-first (`src/index.css` `@theme` is the only token source).
+- Don't bypass `cn()` — `tailwind-merge` dedup matters; never concatenate Tailwind strings with template literals.
+
+**Data / A11y**
+- Don't omit `imageAlt` or `imageFallback` on `grounds`/`ministries`.
+- Don't remove `alt=""` on decorative hero overlays (`PageHero`); don't drop `aria-expanded`/`aria-label` on the mobile toggle or `aria-label="Jump to ministry"` on the Ministries pills.
+- Don't let `SkipLink` rewrite the hash — its `preventDefault` + imperative `focus()` is load-bearing for HashRouter.
+
+**Build / Deploy**
+- Don't commit `dist/`/`node_modules/`. `skills/` is already committed vendored reference content — don't import from it or lint it (eslint ignores it). `src.orig/` is likewise committed but ignored.
+- Don't upload `dist/index.html` without `dist/images/` — the 8 image files are copied via `publicDir`, not inlined; both must ship together to GH Pages/S3.
+- Don't assume `pnpm test` or `pnpm test:e2e` are green — `src/` has 0 unit tests and `e2e/` is stale Rother-era. Don't ship a "green CI" claim without restoring the full gate (`lint && typecheck && test && test:e2e && build`).
+
+---
+
+## 14. Best Practices
+
+- **File naming:** `PascalCase.tsx` for components/pages (`PageHero.tsx`), `camelCase.ts` for data/utils (`content.ts`, `cn.ts`), `useThing.ts` for hooks (`useScrolled.ts`).
+- **Imports:** Always `@/` for cross-directory; relative `./` only within the same folder.
+- **Types:** `interface` for shapes, `type` for unions; `import type` for type-only imports; rely on inference, add explicit returns only at public boundaries. Never `any`.
+- **React:** Hooks-only, composition over inheritance, early returns, handle `loading`/`error`/`empty`/`success` where data is async; disable buttons during async ops.
+- **Styling:** Extend `@theme` before adding a utility; keep bespoke CSS to `@layer base/utilities` in `src/index.css`; mobile-first `sm:`/`lg:`; one shadow (`shadow-shrine`), two radii (`sm`/`full`). Use `shrine-cream/parchment(+dark)/stone/ink/charcoal/maroon-*/gold-*/pine-*/terracotta-*` + utilities `text-balance` / `bg-adobe-texture` / `bg-grain` / `divider-weave`/`divider-weave-thin` / `gold-rule`/`gold-rule-left` / `hero-ken-burns` / `reveal`+`reveal-visible` / `skip-link` / `mask-fade-b`.
+- **Data:** Keep `site.ts` as the single source for name/address/hours/mass/contact/transport/feast/uen/chequePayee/facebook/archdiocese/mapsUrl/mapsEmbedSrc. Pages consume it — don't duplicate. `content.ts` arrays + `nav.ts` nav are the only other data sources.
+- **Git:** Conventional Commits (`feat:`, `fix:`, `docs:` …), atomic commits, `feat/<slug>` branches, squash-merge, short-lived (1–3 days). Don't edit `package.json` by hand for deps — use `pnpm install <pkg>`.
+- **Docs:** Update `README.md` + `AGENTS.md` + `CLAUDE.md` + this file when adding a route/token/image/nav child. Keep `skills/skills-catalog.md` out of scope (vendored).
+
+---
+
+## 15. Coding Patterns
+
+### 15.1 Button Variant Record (copy-pasteable)
+
+Location: `src/components/ui/Button.tsx`
+
+```tsx
+// src/components/ui/Button.tsx — actual implementation (discriminated union)
+import { Link } from "react-router-dom";
+import { cn } from "@/utils/cn";
+
+type Variant = "primary" | "secondary" | "ghost" | "outline-light";
+const variantClasses: Record<Variant, string> = {
+  primary: "bg-shrine-gold-500 text-shrine-maroon-900 hover:bg-shrine-gold-300 shadow-shrine",
+  secondary: "bg-shrine-maroon-600 text-shrine-cream hover:bg-shrine-maroon-500",
+  ghost: "bg-transparent text-shrine-maroon-600 hover:bg-shrine-maroon-50",
+  "outline-light": "border border-shrine-cream/70 text-shrine-cream hover:bg-shrine-cream/10",
+};
+// baseClasses adds rounded-sm sizing + focus-visible ring + disabled styles.
+export function Button(props: ButtonProps) {
+  const classes = cn(baseClasses, variantClasses[props.variant ?? "primary"], props.className);
+  if ("to" in props && props.to) return <Link to={props.to} className={classes} {...rest} />;
+  if ("href" in props && props.href) return <a href={props.href} className={classes} {...rest} />;
+  return <button type="button" className={classes} {...rest} />;
+}
+```
+
+### 15.2 Layout Hash-Scroll Restoration (double-hash aware)
+
+Location: `src/components/Layout.tsx` — preserves both `/#/worship#mass` and `/#/ministries#liturgical` forms.
+
+```tsx
+// src/components/Layout.tsx — actual Bukit Timah implementation
+import { useEffect } from "react";
+import { Outlet, useLocation } from "react-router-dom";
+import { Footer } from "@/components/Footer";
+import { Header } from "@/components/Header";
+import { SkipLink } from "@/components/SkipLink";
+
+function resolveAnchor(pathname: string, hash: string) {
+  if (hash && hash.length > 1) return hash.slice(1);
+  // Double-hash form: #/ministries#liturgical or #/worship#mass → take the last segment
+  const raw = window.location.hash;
+  const parts = raw.split("#").filter(Boolean);
+  if (parts.length < 2) return "";
+  const last = parts[parts.length - 1] ?? "";
+  const cleaned = last.replace(/^\//, "");
+  if (!cleaned || cleaned === pathname.replace(/^\//, "")) return "";
+  return cleaned;
+}
+
+export function Layout() {
+  const { pathname, hash } = useLocation();
+  useEffect(() => {
+    const id = resolveAnchor(pathname, hash);
+    if (id) {
+      const el = document.getElementById(id);
+      if (el) {
+        window.setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+        return;
+      }
+    }
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  }, [pathname, hash]);
+  return (
+    <>
+      <SkipLink />
+      <Header />
+      <main id="main-content" tabIndex={-1}>
+        <Outlet />
+      </main>
+      <Footer />
+    </>
+  );
+}
+```
+
+Current anchor targets: `#mass`/`#confession`/`#visit` on `/worship` and `#liturgical`/`#faith-formation`/`#pastoral-care`/`#family-life`/`#youth`/`#mandarin` on `/ministries` (see §5.4). Any new hash anchor must be added as a `section id="…" className="scroll-mt-28 …"` and wired via `primaryNav`/`footerNav` + the Ministries jump nav where appropriate.
+
+### 15.3 `cn()` Merge
+
+Location: `src/utils/cn.ts`
+
+```ts
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+export function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)); }
+```
+
+### 15.4 PageHero Overlay (decorative image)
+
+Location: `src/components/PageHero.tsx`
+
+```tsx
+export function PageHero({ eyebrow, title, description, image, children, compact }: PageHeroProps) {
+  return (
+    <section className="relative overflow-hidden bg-shrine-maroon-900 py-20 sm:py-28">
+      <img src={image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-25" aria-hidden="true" />
+      <div className="absolute inset-0 bg-gradient-to-t from-shrine-maroon-900 via-shrine-maroon-900/85 to-shrine-maroon-900/60" />
+      <div className="absolute inset-0 bg-grain opacity-40" aria-hidden="true" />
+      <Container className="relative">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-shrine-gold-300">{eyebrow}</p>
+        <h1 className="mt-4 max-w-3xl text-balance font-display text-4xl font-semibold text-shrine-cream sm:text-5xl">{title}</h1>
+        {description ? <p className="mt-5 max-w-2xl text-base leading-relaxed text-shrine-cream/80">{description}</p> : null}
+        {children}
+      </Container>
+      <div className="divider-weave-thin absolute inset-x-0 bottom-0" aria-hidden="true" />
+    </section>
+  );
+}
+```
+
+### 15.5 Ministries Jump Nav (HashRouter-safe)
+
+Location: `src/pages/Ministries.tsx`
+
+```tsx
+import { Link } from "react-router-dom";
+import { images, ministries } from "@/data/content";
+
+// Pills — must use <Link to="/ministries#id">, never <a href="#id">
+<nav aria-label="Ministries">
+  {ministries.map((ministry) => (
+    <Link
+      key={ministry.id}
+      to={`/ministries#${ministry.id}`}
+      aria-label="Jump to ministry"
+      className="rounded-full border border-shrine-stone bg-white px-4 py-2 text-sm font-medium text-shrine-charcoal hover:bg-shrine-parchment"
+    >
+      {ministry.title}
+    </Link>
+  ))}
+</nav>
+
+// Sections — alternating bands, each a hash target
+{ministries.map((ministry, index) => (
+  <section
+    key={ministry.id}
+    id={ministry.id}
+    className={cn("scroll-mt-28 py-16 sm:py-20", index % 2 === 0 ? "bg-shrine-cream" : "bg-shrine-parchment")}
+    aria-labelledby={`${ministry.id}-heading`}
+  >
+    <Container>
+      <h2 id={`${ministry.id}-heading`} className="font-display text-2xl font-semibold text-shrine-maroon-700">{ministry.title}</h2>
+      {/* … */}
+    </Container>
+  </section>
+))}
+```
+
+---
+
+## 16. Coding Anti-Patterns
+
+| Don't | Do Instead | Why |
+|---|---|---|
+| `className="bg-[#691f1e]"` | `className="bg-shrine-maroon-600"` | Token drift — `@theme` is the palette |
+| `` className={`px-3 ${open?"px-6":""}`} `` | `className={cn("px-3", open && "px-6")}` | `twMerge` dedup |
+| `import hero from "../../public/images/hero.jpg"` | `<img src="/images/hero-church.jpg" … />` or `images.heroFallback` | `public/` is served at root (`/images/…`); Vite copies to `dist/images/` |
+| `<a href="/about">` for internal nav | `<Link to="/about">` or `<Button to="/about">` | HashRouter + active state; plain `<a>` triggers full reload |
+| `<a href="#liturgical">` inside Ministries | `<Link to="/ministries#liturgical">` | Hash is the route — plain `href` replaces it and routes to NotFound (§9 #11) |
+| `type TimelineEntry = { year: string }` for a shape | `interface TimelineEntry { year: string }` | `interface` for shapes (`type` for unions) |
+| `const x: any = json` | `const x: unknown = json; if (isTimeline(x)) …` | No `any` — narrow `unknown` |
+| `import { tailwindConfig } from "…"` | Extend `@theme` in `src/index.css` | No config file in Tailwind v4 |
+| `BrowserRouter` without `404.html` | `HashRouter` (or add GH Pages SPA shim) | Static-host deep-link 404 |
+| `fallback="/images/hero-shrine.jpg"` | `fallback="/images/hero-church.jpg"` (or `images.heroFallback`) | Rother fallback path is gone |
+| Duplicating `site.address`/`site.mass` strings in a page | `import { site } from "@/data/site"` | `site.ts` is the single source (§7.1) |
+| Adding `GroundsPlace`/`Ministry` without `imageAlt`/`imageFallback` | Always include both | A11y + CDN fallback contract |
+
+---
+
+## 17. Responsive Breakpoint Reference
+
+Tailwind defaults only (no custom config). Project usage:
+
+| Breakpoint | Min-Width | Usage in this SPA |
+|---|---|---|
+| *(default)* | `0` | Single-col, stacked hero, mobile drawer (`Header` hamburger) |
+| `sm` | `640px` | 2-col quick-facts `grid-cols-2`, `px-8`, `text-5xl` heroes, `py-24 sm:py-28` sections |
+| `lg` | `1024px` | `lg:flex` header nav (desktop dropdown), `lg:grid-cols-2` welcome split, `lg:grid-cols-3` grounds cards |
+
+**Rule:** Mobile-first — default is mobile; `sm:` then `lg:` only. Test: `pnpm dev` + Chrome DevTools `375×812` (iPhone) → `1280×800`. Header breakpoint is `lg` (drawer below `lg`, flex nav at `lg`).
+
+---
+
+## 18. Z-Index Layer Map
+
+| Layer | `z-*` | Element | File | Purpose |
+|---|---|---|---|---|
+| Top | `z-[100]` | Skip-to-content link | `src/components/SkipLink.tsx` (`.skip-link` utility) | Always reachable above everything when focused |
+| High | `z-50` | `<header>` + its desktop dropdown | `src/components/Header.tsx` | Fixed nav above content + hero; dropdown inherits header stacking |
+| Mid | `z-40` | Ministries jump nav (sticky under header, if sticky) | `src/pages/Ministries.tsx` | Sticky section nav below the fixed header — verify against `Header` height |
+| Base | `z-auto` | `main`, `footer`, `PageHero` gradients, `Timeline` rail | `src/components/Layout.tsx`, `Footer.tsx`, `PageHero.tsx`, `Timeline.tsx` | Normal flow |
+| Portal | — | None yet | — | Add Radix/Portal table when modals exist |
+
+**Conflict rule:** `Header` owns `z-50`; jump nav stays below it at `z-40`; only the skip link may exceed them (`z-[100]`). Don't add competing layers without updating this table. If making the Ministries pill bar `sticky top-[…]`, verify `scroll-mt-28` on target sections still clears the header.
+
+---
+
+## 19. Color Reference (Complete)
+
+Every hex matches `src/index.css` `@theme` byte-for-byte. **Fail the build if it drifts.** Palette is unchanged from the rothershrine line — verification command `grep shrine- src/index.css` → 24 colors + 2 shadows.
+
+| Token | Hex | RGB | Tailwind Class | Usage (Bukit Timah context) |
+|---|---|---|---|---|
+| `shrine-cream` | `#faf6ec` | `250,246,236` | `bg-shrine-cream` | Page bg, card on dark, alternating ministry band |
+| `shrine-parchment` | `#f2e9d6` | `242,233,214` | `bg-shrine-parchment` | Section bands, alternating ministry band |
+| `shrine-parchment-dark` | `#e7d9b8` | `231,217,184` | `bg-shrine-parchment-dark` | Dark parchment variant |
+| `shrine-stone` | `#dccfae` | `220,207,174` | `border-shrine-stone` | Borders/dividers, ministry pill border |
+| `shrine-ink` | `#2a2115` | `42,33,21` | `text-shrine-ink` | Primary text |
+| `shrine-charcoal` | `#423a2c` | `66,58,44` | `text-shrine-charcoal` | Secondary text / 70% |
+| `shrine-maroon-50` | `#fbf0ee` | `251,240,238` | `bg-shrine-maroon-50` | Ghost hover bg |
+| `shrine-maroon-100` | `#f3d9d4` | `243,217,212` | — | Light tint |
+| `shrine-maroon-500` | `#7c2a25` | `124,42,37` | `text-shrine-maroon-500` | Eyebrow on light, links |
+| `shrine-maroon-600` | `#691f1e` | `105,31,30` | `bg-shrine-maroon-600` | Secondary btn, timeline badge, weave band |
+| `shrine-maroon-700` | `#55191a` | `85,25,26` | `text-shrine-maroon-700` | Display heading (`h1–h4`) |
+| `shrine-maroon-800` | `#431315` | `67,19,21` | — | Mid-dark maroon |
+| `shrine-maroon-900` | `#33100f` | `51,16,15` | `bg-shrine-maroon-900` | Hero + footer bg |
+| `shrine-maroon-950` | `#200a0a` | `32,10,10` | `bg-shrine-maroon-950` | Deepest maroon (header top strip) |
+| `shrine-gold-100` | `#f8ecd2` | `248,236,210` | — | Light gold |
+| `shrine-gold-300` | `#e2bf72` | `226,191,114` | `text-shrine-gold-300` | Eyebrow on dark, icon tint |
+| `shrine-gold-400` | `#d1a955` | `209,169,85` | — | Gold mid |
+| `shrine-gold-500` | `#c3963f` | `195,150,63` | `bg-shrine-gold-500` | Primary CTA, gold rule |
+| `shrine-gold-600` | `#a67a2e` | `166,122,46` | — | Gold hover |
+| `shrine-pine-500` | `#335840` | `51,88,64` | `text-shrine-pine-500` | Pine accent |
+| `shrine-pine-600` | `#26402f` | `38,64,47` | `bg-shrine-pine-600` | Weave third band |
+| `shrine-pine-700` | `#1c3123` | `28,49,35` | `bg-shrine-pine-700` | Deep pine |
+| `shrine-terracotta-400` | `#c17a53` | `193,122,83` | — | Terracotta mid |
+| `shrine-terracotta-500` | `#ab5f3c` | `171,95,60` | `bg-shrine-terracotta-500` | Community/devotion badge |
+| `shadow-shrine` | `rgba(51,16,15,0.45)` | — | `shadow-shrine` | `0 20px 60px -20px` |
+| `shadow-shrine-lg` | `rgba(51,16,15,0.55)` | — | `shadow-shrine-lg` | `0 40px 90px -30px` |
+
+**Forbidden:** `amber-*`, `slate-*`, `zinc-*`, `gray-*` generics (except Tailwind neutrals in tooling). Only exception: tooling grays in `node_modules`.
+
+---
+
+## 20. The Complete TypeScript Interface Reference
+
+All interfaces below compile as-is against `tsconfig.json` (`strict` + `bundler` + `react-jsx`). Locations: `src/data/*`, `src/components/ui/*`, `src/utils/cn.ts`. **Verbatim against `src/data/content.ts`, `src/data/nav.ts`, `src/data/site.ts`, `src/components/SafeImage.tsx`, `src/components/ui/*`.**
+
+### 20.1 Content Interfaces (`src/data/content.ts`)
+
+```ts
+export interface TimelineEntry {
+  year: string;
+  title: string;
+  description: string;
+}
+// lifeTimeline: TimelineEntry[] — 8 entries (1845, 1846, 1853, 1861, 1910s, 1964, 1991–97, 2012–17)
+// Singapore hill mission: Kranji attap → Palladian church → statue → rubber/return → Teng rebuild → stations/columbarium/hall → consecration/Rosary Garden
+
+export interface GroundsPlace {
+  id: string;              // "main-church" | "chapel" | "rosary-garden"
+  title: string;
+  summary: string;
+  details: string[];       // 4 bullets each
+  image: string;           // CDN (naveCdn/courtyardCdn) or local /images/*
+  imageFallback: string;   // local /images/* — required (SafeImage fallback)
+  imageAlt: string;        // required — a11y
+}
+// grounds: GroundsPlace[] — 3 (replaces orig whatToSee[3]: pilgrim-center/shrine-church/tepeyac-hill)
+
+export interface Ministry {
+  id: string;              // "liturgical" | "faith-formation" | "pastoral-care" | "family-life" | "youth" | "mandarin"
+  title: string;
+  summary: string;
+  details: string[];       // 4 bullets each
+  image: string;
+  imageFallback: string;   // required
+  imageAlt: string;        // required
+}
+// ministries: Ministry[] — 6 (new — no orig counterpart)
+
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+// faqs: FaqItem[] — 6 (Mass/confession/MRT+ gates/feast 1 May/baptism-marriage-Mass intention/cemetery-columbarium)
+
+export interface EventItem {
+  title: string;
+  date: string;            // "22–23 August" | "First Wednesday of each month" | "Sundays from 23 August, 12.45–3.30 p.m." …
+  summary: string;
+  category: "Parish" | "Devotion" | "Formation" | "Archdiocese";
+  href?: string;           // optional — e.g. Youth "An Encounter with Jesus" → https://tinyurl.com/54rbyjyr
+}
+// upcomingEvents: EventItem[] — 6 (orig: 4 with date+title+location+description+category Feast/Pilgrimage/Formation/Community)
+
+export interface GivingOption {
+  name: string;            // PayNow | Weekend collections | Cash boxes | Cheque | SSVP — Friends in Need | GIFT (Archdiocese) | Boys' Town | Mass offerings
+  description: string;
+  icon: "flame" | "church" | "sprout" | "heart" | "book" | "hand-heart" | "landmark" | "globe";
+}
+// givingOptions: GivingOption[] — 8 (same count, all names replaced from orig General Fund/Pipe Organ/Tepeyac Hill/Apla's Circle/…)
+
+export interface Priest {
+  name: string;
+  role: string;            // "Parish Priest" | "Assistant Priest" | "Religious (ex-officio)"
+  phone?: string;          // e.g. +65 6760 0052
+}
+// priests: Priest[] — 3 (new — no orig counterpart)
+
+export interface PpcMember {
+  role: string;            // "Parish Priest (ex-officio)" | "Chairman (appointed)" | "Advisor" | "Vice-Chairman (elected)" | "Secretary" | "Estate Maintenance" | "Faith Formation" | …
+  name: string;
+}
+// ppcMembers: PpcMember[] — 16 (new — 3 ex-officio clergy + 13 PPC)
+
+// Untyped const exports (no exported interface — shape inferred):
+
+export const serveRoles: {
+  title: string;           // "Liturgical ministers" | "Catechists & facilitators" | "Pastoral care" | "Hospitality & grounds"
+  description: string;
+}[] // 4
+
+export const devotions: {
+  title: string;           // "Mass in Honour of St Joseph" | "First Friday Mass & Holy Hour" | "Holy Hour for Vocations" | "Children's Mass" | "Divine Mercy" | "Adoration"
+  when: string;            // "First Wednesday, 7.30 p.m. rosary · 8.00 p.m. Mass" | …
+  where: string;           // "Main Church" | "Chapel of St Joseph — with seminarians of SFXMS" | "Adoration Room" | …
+}[] // 6
+
+export const images: {
+  hero: string;            // Wikimedia 2025 front view
+  heroFallback: string;    // "/images/hero-church.jpg"
+  chapel: string;          // "/images/chapel-interior.jpg"
+  sanctuary: string;       // "/images/sanctuary.jpg"
+  garden: string;          // "/images/rosary-garden.jpg"
+  glass: string;           // "/images/stained-glass.jpg"
+  hall: string;            // "/images/parish-hall.jpg"
+  cemetery: string;        // "/images/cemetery.jpg"
+  feast: string;           // "/images/feast.jpg"
+  naveCdn: string;         // Pexels
+  courtyardCdn: string;    // Pexels
+} // as const — 11 keys, 3 CDN (hero + 2 Pexels) on 2 hosts
+```
+
+### 20.2 Navigation Interfaces (`src/data/nav.ts`)
+
+```ts
+export interface NavLink {
+  label: string;
+  to: string;              // "/about" | "/worship#mass" | "/ministries#liturgical" | "/news-events" …
+}
+export interface NavItem {
+  label: string;
+  to: string;
+  description?: string;
+  children?: (NavLink & { description?: string })[]; // hover dropdown + mobile drill-down source
+}
+// primaryNav: NavItem[] — 6 (Home, About [3 children], Worship [3 children: #mass/#confession/#visit], Ministries [3 children: liturgical/faith-formation/pastoral-care], News & Events, Serve)
+// footerNav: NavLink[] — 10 (The Parish, Mass Times→/worship#mass, History, FAQ, Liturgical→/ministries#liturgical, Faith Formation, Pastoral Care, News & Events, Serve, Give)
+```
+
+### 20.3 Site Constants (`src/data/site.ts`)
+
+```ts
+// src/data/site.ts — single source for parish facts (as const)
+export const site: {
+  name: "St Joseph's Church (Bukit Timah)";
+  shortName: "St Joseph's Bukit Timah";
+  chineseName: "圣若瑟堂";
+  tagline: "A vibrant, evangelizing and missionary Church, under the patronage of St Joseph.";
+  vision: "To nourish faith in a loving, outreaching community.";
+  address: {
+    street: "620 Upper Bukit Timah Road";
+    city: "Singapore";
+    zip: "678116";
+    readonly full: string;   // getter: `${street}, ${city} ${zip}`
+    readonly query: string;  // getter: encodeURIComponent(full)
+  };
+  hours: {
+    gates: "Daily, 8.00 a.m.–9.00 p.m.";
+    mainChurch: "Open for Mass and private prayer";
+    chapel: "Weekday Masses and scheduled devotion";
+    bookshop: "Sat 4.30–7.00 p.m.; Sun 8.30 a.m.–1.00 p.m. (2nd Sunday also 5.30–7.00 p.m.)";
+    adorationRoom: "Tuesday Holy Hour, 8.00 p.m.";
+  };
+  mass: {
+    weekdayMorning: "Mon–Sat, 6.30 a.m. — Chapel of St Joseph";
+    weekdayEvening: "Mon–Fri, 6.30 p.m. — Chapel of St Joseph";
+    saturday: "5.30 p.m. English (Sunset Mass)";
+    sunday: readonly ["7.30 a.m. Mandarin", "9.30 a.m. English", "11.30 a.m. English", "5.30 p.m. English"];
+    confession: "15 minutes before all weekend Masses, open foyer of the Main Church";
+    adoration: "Every Tuesday, 8.00 p.m. — Adoration Room";
+    secondCollection: "4th Sunday of the month — Church Maintenance and Operation Fund";
+  };
+  contact: {
+    parishPriestPhone: "+65 6760 0052";
+    assistantPriestPhone: "+65 6760 4636";
+    officePhone: "+65 6769 1666";
+  };
+  transport: {
+    mrt: "Cashew MRT (Downtown Line)";
+    buses: "67, 75, 170, 176, 178, 184, 961, 963, 970";
+  };
+  feast: {
+    name: "Feast of St Joseph the Worker";
+    date: "1 May";
+  };
+  uen: "T08CC4043C";
+  chequePayee: "St. Joseph's Church (Bukit Timah)";
+  facebook: "https://www.facebook.com/sjcbt/";
+  archdiocese: "https://www.catholic.sg/";
+  mapsUrl: string;        // https://www.google.com/maps/search/?api=1&query=620+Upper+Bukit+Timah+Road+Singapore+678116
+  mapsEmbedSrc: string;   // https://www.google.com/maps?q=620+Upper+Bukit+Timah+Road,+Singapore+678116&output=embed
+} // as const — Footer + Worship + About consume it; never duplicate parish facts in pages
+
+// src/components/SafeImage.tsx
+export interface SafeImageProps {
+  src: string;
+  fallback?: string;           // default "/images/hero-church.jpg" (Bukit Timah — not hero-shrine.jpg)
+  alt: string;                 // required — a11y
+  className?: string;
+  loading?: "lazy" | "eager";  // default "lazy"
+}
+
+// images export (see 20.1) — 11 entries; 3 CDN fall back to /images/* via SafeImage
+```
+
+### 20.4 UI Primitive Props
+
+```ts
+// src/components/ui/Button.tsx
+type Variant = "primary" | "secondary" | "ghost" | "outline-light";
+type ButtonProps =
+  | ({ to: string } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { variant?: Variant; icon?: React.ReactNode; className?: string })
+  | ({ href: string } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { variant?: Variant; icon?: React.ReactNode; className?: string })
+  | (React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; icon?: React.ReactNode; className?: string });
+// discriminated: `to` → <Link>, `href` → <a>, else <button>; all carry `className?` via rest + cn()
+
+// src/components/ui/Container.tsx
+interface ContainerProps { children: React.ReactNode; className?: string; }
+
+// src/components/ui/SectionHeading.tsx
+interface SectionHeadingProps {
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  align?: "left" | "center";
+  light?: boolean;         // light = gold/cream on dark
+  className?: string;
+}
+
+// src/components/PageHero.tsx
+interface PageHeroProps {
+  eyebrow: string;
+  title: string;
+  description?: string;
+  image: string;           // hero image src (Wikimedia CDN, fallback /images/hero-church.jpg via SafeImage where used)
+  children?: React.ReactNode;
+  compact?: boolean;       // tighter vertical padding
+}
+
+// src/components/ui/Reveal.tsx
+interface RevealProps { children: React.ReactNode; delay?: number; as?: "div" | "li"; className?: string; }
+
+// src/components/ui/Accordion.tsx
+interface AccordionProps { items: { question: string; answer: string }[]; } // faqs[6]
+
+// src/hooks/useScrolled.ts
+export function useScrolled(threshold?: number): boolean; // default 12; Header uses 16
+```
+
+### 20.5 Utility
+
+```ts
+// src/utils/cn.ts
+import type { ClassValue } from "clsx";
+export function cn(...inputs: ClassValue[]): string; // twMerge(clsx(...))
+```
+
+---
+
+## Appendix A — ADRs (Architecture Decision Records)
+
+| # | Decision | Rationale | Consequence |
+|---|---|---|---|
+| ADR-1 | `HashRouter` over `BrowserRouter` | Zero-config deploy to GH Pages/S3 — no server rewrites; deep-links (`/#/worship#mass`, `/#/ministries#liturgical`) survive refresh | URLs contain `/#/` — acceptable for a parish SPA; `404.html` shim required if migrating to `BrowserRouter` |
+| ADR-2 | `vite-plugin-singlefile` | Primary `dist/index.html` (+ `dist/images/` public copy — 8 files) — trivial upload, no asset path breakage | Singlefile inlines JS+CSS only; `publicDir` is copied; no code-splitting; keep `index.html` ≤400 kB |
+| ADR-3 | Tailwind v4 CSS-first `@theme` | Tokens co-located with CSS, no `tailwind.config.*` drift; `index.css` is the palette (24 colors + 2 shadows unchanged from rothershrine) | Extend `@theme` only, never arbitrary hex |
+| ADR-4 | File-backed `src/data/*` (no CMS) | Typed arrays are enough for ~40 items (8+3+6+6+6+8+3+16+4+6) plus `site` + `nav`; CMS adds auth/ISR without benefit | Keep `content.ts`/`site.ts`/`nav.ts` as fallback if CMS is introduced behind `src/lib/cms/` |
+| ADR-5 | Alias `@→src/` sync contract | Short imports (`@/utils/cn`) without relative `../../../` | Two-file change (`vite.config.ts` + `tsconfig.json` `paths` + `include`) — must stay synced |
+| ADR-6 | `src.orig/` frozen reference | Preserve the complete Rother Shrine original as a non-imported snapshot for diff/audit without polluting lint/tsc | `eslint` ignores `src.orig/`; `tsconfig` excludes it; never import from it |
+
+---
+
+## Appendix B — Live-Site Validation
+
+**Smoke script (manual or `agent-browser` — Bukit Timah routes):**
+
+```
+# after pnpm build && pnpm preview (:4173)
+1. /                      → hero (Wikimedia 2025 front view + hero-church fallback) + quick-facts + grounds 3 + events visible
+2. /about                 → parish identity + priests 3 + ppcMembers 16
+3. /history               → timeline 8 entries (1845–2017 hill milestones) via Timeline left rail
+4. /worship               → #mass (weekday/weekend Mass), #confession (confession + adoration + devotions), #visit (map + hours + transport); test /mass-times, /hours-location, /visit aliases all land on Worship
+5. /worship#mass (direct) → lands on Mass schedule
+6. /worship#confession    → lands on Confession & Adoration
+7. /worship#visit         → lands on Find Us (map embed + Cashew MRT + buses)
+8. /ministries            → 6 pills + 6 alternating sections; click each #liturgical/#faith-formation/#pastoral-care/#family-life/#youth/#mandarin scrolls to section
+9. /ministries#liturgical (direct) → lands on Liturgical
+10. /ministry             → same as /ministries (alias)
+11. /news-events + /news-and-events → 6 events (Parish/Devotion/Formation/Archdiocese) + Youth href
+12. /serve + /volunteer   → serveRoles 4 + devotions 6
+13. /give + /donate       → 8 giving options (PayNow UEN, collections, cheque, SSVP, GIFT, Boys' Town, Mass offerings)
+14. /faq                  → 6 Q&As via Accordion
+15. /does-not-exist       → NotFound
+16. refresh on /#/worship#visit → stays on-section (HashRouter)
+17. refresh on /#/ministries#youth → stays on-section
+```
+
+What CI cannot catch: hash-scroll offset on mobile Safari, `divider-weave` paint, font FOIT, `shadow-shrine` clip on `overflow-hidden` parent, Wikimedia/Pexels CDN fallback timing.
+
+---
+
+## Appendix C — The Meticulous Approach (6-Phase Workflow)
+
+This project follows **ANALYZE → PLAN → VALIDATE → IMPLEMENT → VERIFY → DELIVER** for every non-trivial task.
+
+1. **ANALYZE** — Mine explicit, implicit, and ambiguous requirements; explore 2–3 approaches with trade-offs.
+2. **PLAN** — Sequenced phases with checklists + success criteria; present for approval.
+3. **VALIDATE** — Obtain explicit go-ahead before coding.
+4. **IMPLEMENT** — Library-first, modular, TDD Red→Green→Refactor (one cycle per commit) where tests exist; where harness is hollow, gate on `lint && typecheck && build` + manual smoke.
+5. **VERIFY** — `pnpm lint` + `pnpm typecheck` + `pnpm build` (+ `pnpm test`/`pnpm test:e2e` once rewritten) + a11y/perf review + edge cases.
+6. **DELIVER** — Usage instructions + runbook + follow-up recommendations.
+
+---
+
+## Appendix D — Migration Note (Rother → Bukit Timah)
+
+### D.1 Provenance
+
+| Item | Detail |
+|---|---|
+| Origin | Blessed Stanley Rother Shrine (Oklahoma City) clone — `rothershrine-v2_SKILL.md` v1.3.0, 2026-08-27, 49 tests (29 unit + 20 E2E) green on fresh clones |
+| Port | St Joseph's Church (Bukit Timah), Singapore — https://stjoseph-bt.org.sg/ — second-oldest Catholic parish, 620 Upper Bukit Timah Road, S678116 |
+| Port version | **1.0.0** (`package.json` `version`) — reset from 1.3.0 to mark the Singapore line; stack and tooling versions unchanged (see §2) |
+| Date | 2026-08-27 |
+| Singlefile deploy | Unchanged — `dist/index.html` (+ `dist/images/` now **8** files vs orig 4) → GH Pages/S3 |
+| Test state | **0 unit tests** + **20 E2E stale** in the port (see §2 / §11) — orig 29 unit + 20 E2E are preserved only in `src.orig/` as reference |
+| Preservation | `src.orig/` is a frozen snapshot of the complete Rother Shrine original (not imported, eslint ignored, tsc excluded). Never import from it; never re-add it to `eslint.config.js` `ignores` exceptions or `tsconfig.json` `include`. |
+
+### D.2 What Changed (AUDIT diff summary)
+
+**Routes — 17 entries (16 paths + `*`) vs orig 16 (15 + `*`):**
+
+| Aspect | Current (Bukit Timah) | Orig (Rother Shrine) | Note |
+|---|---|---|---|
+| Total | 17 `Route` entries | 16 | +1 alias path |
+| Page components | 10 (Home, About, History, Worship, Ministries, NewsEvents, Serve, Give, FAQ, NotFound) | 10 (Home, AboutRother, History, WhatToSee, Pilgrimage, NewsEvents, Volunteer, Give, FAQ, NotFound) | 4 renamed: `AboutRother→About`, `WhatToSee→Ministries`, `Pilgrimage→Worship`, `Volunteer→Serve` |
+| Alias groups | 5 groups, 7 alias paths | 5 groups, 6 alias paths | See §5.4 |
+| `/about` | **Canonical** | Alias of `/about-blessed-stanley-rother` (canonical) | **Flipped** |
+| `/hours-location` | Alias of **`/worship`** | Alias of `/pilgrimage` | **Reassigned** |
+| `/visit` | Alias of **`/worship`** (with `/mass-times`) | Alias of `/pilgrimage` (with `/visit-planning`) | `/visit` moved; `/mass-times` new, `/visit-planning` removed |
+| `/what-to-see` / `/grounds-art-architecture` | **Gone** — replaced by `/ministries` / `/ministry` | Canonical `/what-to-see` + alias `/grounds-art-architecture` | 6 ministries + jump nav replace 3 shrine-site cards |
+| `/volunteer` | **Alias** of `/serve` | Sole route (no alias) | `/serve` is new canonical |
+| `/give` aliases | `/donate` | `/shrinegift` | Replaced |
+| Hash anchors | `#mass`/`#confession`/`#visit` (Worship) + 6 ministry ids | `#pilgrim-center`/`#shrine-church`/`#tepeyac-hill` (WhatToSee) + `#visit` (Pilgrimage) | **Completely replaced** |
+
+**Data — `src/data/content.ts`:**
+
+| Array / Export | Current | Orig | Diff |
+|---|---|---|---|
+| Interfaces | 8 (`TimelineEntry`, `GroundsPlace`, `Ministry`, `FaqItem`, `EventItem`, `GivingOption`, `Priest`, `PpcMember`) | 5 (`TimelineEntry`, `WhatToSeeSection`, `FaqItem`, `EventItem`, `GivingOption`) | `WhatToSeeSection` removed; `GroundsPlace`/`Ministry`/`Priest`/`PpcMember` added |
+| `lifeTimeline` | 8 — **1845–2017** Singapore hill mission | 8 — 1935–2023 Oklahoma/Guatemala martyr | Same length, different century/region |
+| `grounds` | 3 — `main-church`/`chapel`/`rosary-garden` (+ `imageFallback`) | `whatToSee` 3 — `pilgrim-center`/`shrine-church`/`tepeyac-hill` | Renamed + split; `GroundsPlace` extends `WhatToSeeSection` with `+imageFallback` |
+| `ministries` | 6 — `liturgical`/`faith-formation`/`pastoral-care`/`family-life`/`youth`/`mandarin` | *(none)* | New |
+| `faqs` | 6 — Mass/confession/MRT+ gates/feast 1 May/baptism-marriage/cemetery | 6 — shrine hours/cost/Mass duration/accessibility/burial | Same count, entirely rewritten |
+| `upcomingEvents` | 6 — `title`+`date`+`summary`+`category` + `href?` (Parish/Devotion/Formation/Archdiocese) | 4 — `date`+`title`+`location`+`description`+`category` (Feast/Pilgrimage/Formation/Community) | +2 events, shape lost `location`, gained `href` |
+| `givingOptions` | 8 — PayNow UEN, collections, cash boxes, cheque, SSVP, GIFT, Boys' Town, Mass offerings | 8 — General Fund, Pipe Organ, Tepeyac Hill, Apla's Circle, Education, Hospitality, Shrine Church, Guatemala Mission | Same count, all names/icons/meanings replaced |
+| `priests` | 3 | *(none)* | New |
+| `ppcMembers` | 16 | *(none)* | New |
+| `serveRoles` | 4 (untyped const) | *(none)* | New |
+| `devotions` | 6 — Mass in Honour of St Joseph, First Friday, Holy Hour for Vocations, Children's Mass, Divine Mercy, Adoration | *(none)* | New |
+| `images` | **11 keys** — `hero` (Wikimedia 2025) + `heroFallback` `/images/hero-church.jpg` + `chapel`/`sanctuary`/`garden`/`glass`/`hall`/`cemetery`/`feast` + `naveCdn`/`courtyardCdn` (Pexels). CDN 3 on 2 hosts | 10 keys — `hero` (Pexels) + `heroFallback` `/images/hero-shrine.jpg` + `wheat`/`wheatFallback`/`atitlan`/`atitlanSunset`/`atitlanAerial`/`chapel`/`garden`/`hillChapel`. CDN 7 on 1 host | `hero` host changed to Wikimedia; wheat/atitlan set removed; local count 8 vs 3 |
+| `site.ts` | 17 top keys; `address` 620 Upper Bukit Timah, `hours` 5 (gates/mainChurch/chapel/bookshop/adorationRoom), `mass` 7 (weekdayMorning/Evening/saturday/sunday[4]/confession/adoration/secondCollection), `contact` 3 phones, `transport` mrt+buses, `feast` 1 May, `uen`/`chequePayee`/`facebook`/`archdiocese`/`mapsUrl`/`mapsEmbedSrc` | Orig `site.ts` had different address/hours/mass/contact/maps for 700 SE 89th St OKC | Entirely replaced |
+
+**Config drift:**
+
+| File | Current | Orig |
+|---|---|---|
+| `vite.config.ts` | No `test` block, no `server.watch.ignored` | Had `test { globals, jsdom, setupFiles, include, exclude }` + `server.watch.ignored` for `skills/` |
+| `tsconfig.json` | `include ["src","vite.config.ts"]`, `types ["node"]` | `include ["src","vite.config.ts","eslint.config.js","playwright.config.ts"]`, `types ["node","vitest/globals"]` |
+| `eslint.config.js` | Ignores `skills` + `src.orig` | Ignores `skills` only |
+| `public/images/` | **8 files** (hero-church, chapel-interior, sanctuary, rosary-garden, stained-glass, parish-hall, cemetery, feast) | 4 files (hero-shrine etc.) |
+| `index.html` | CSP `img-src` adds `upload.wikimedia.org`; OG/meta for St Joseph BT | CSP `img-src https:` only; OG for Rother Shrine |
+| `_redirects`/`404.html` | Not needed (`HashRouter`) | Not needed |
+
+### D.3 What Stayed
+
+- **Design tokens** — `src/index.css` `@theme` (24 colors + 2 shadows) + `@layer` utilities (13 + 2 keyframes) + typography (Fraunces + Source Sans 3) — byte-for-byte identical.
+- **Component primitives** — `Button`/`Container`/`SectionHeading`/`Accordion`/`Reveal`/`SafeImage`/`Emblem`/`SkipLink`/`Timeline`/`SocialIcons`/`Header`/`Footer`/`PageHero`/`Layout` — same files, same APIs, only `SafeImage` default fallback updated (`hero-church.jpg`).
+- **Hook** — `useScrolled.ts` identical; Header still `useScrolled(16)`.
+- **Stack & versions** — React 19.2.8, Vite 7.3.6, Tailwind 4.3.3, TypeScript 5.9.3, React Router 7.18.2, singlefile 2.3.3, eslint 9.39.5, vitest 3.2.6, playwright 1.55.1 — all pinned exact.
+- **HashRouter + singlefile + alias-contract patterns** — same ADRs, only the route names changed.
+
+### D.4 How to Use `src.orig/`
+
+- **Read-only reference** for auditing the port — diff `src/App.tsx` vs `src.orig/App.tsx`, `src/data/*` vs `src.orig/data/*`, etc.
+- **Do not import** from it — the app must not depend on `src.orig/`.
+- **Do not lint/type-check** it — it is excluded from `eslint.config.js` `ignores` and `tsconfig.json` `include`.
+- **Do not delete** it — it is the provenance record for the Rother Shrine line and the template for rewriting `e2e/` + unit tests (6 files/29 tests reference).
+
+---
+
+## Quick Reference Card
+
+| Need | Path |
+|---|---|
+| Visitor overview | `README.md` |
+| 60-sec agent cheat sheet | `AGENTS.md` |
+| Deep workflow + hill-parish fidelity | `CLAUDE.md` |
+| Intent lineage | `docs/prompts.md` (if present) |
+| Tokens (24 colors + 2 shadows) + utilities (13 + 2 keyframes) | `src/index.css` (`--font-sans` alias `--font-body`; utilities incl. `gold-rule`/`gold-rule-left`/`hero-ken-burns`/`reveal`+`reveal-visible`/`skip-link`/`divider-weave`+`divider-weave-thin`/`bg-grain`+`bg-adobe-texture`/`mask-fade-b`) |
+| Route table + aliases + anchors | `src/App.tsx` — 17 Route entries (16 content paths + `*`), 7 alias paths in 5 groups (see §5.4), 9 hash anchors (3 on `/worship`, 6 on `/ministries`) |
+| Nav single-source | `src/data/nav.ts` (`primaryNav` 6 + `footerNav` 10, with `description` on children) |
+| Content arrays (10) + images + site | `src/data/content.ts` (`priests` 3, `ppcMembers` 16, `lifeTimeline` 8 [1845–2017], `grounds` 3, `ministries` 6, `faqs` 6, `upcomingEvents` 6 [Parish/Devotion/Formation/Archdiocese + href?], `givingOptions` 8 + `serveRoles` 4 + `devotions` 6 + `images` 11) + `src/data/site.ts` (`site as const`: hours 5 + mass 7 + transport + feast 1 May + uen T08CC4043C + maps) |
+| Primitives | `src/components/ui/*` (Button/Container/SectionHeading/Accordion/Reveal) + SafeImage/Emblem/SkipLink/Timeline/SocialIcons/PageHero/Layout/Header/Footer |
+| Hooks | `src/hooks/useScrolled.ts` (threshold 12 default; Header uses 16) |
+| Merge helper | `src/utils/cn.ts` (`twMerge(clsx)`) |
+| Images | `public/images/*.jpg` (8 files → `dist/images/`) + Wikimedia hero + 2 Pexels CDN (`naveCdn`/`courtyardCdn`) + `images` export (onError→local via `SafeImage` with `hero-church.jpg` fallback) |
+| Vite alias + singlefile | `vite.config.ts` (`@→src`, `viteSingleFile()`; no `test` block, no `server.watch.ignored` — re-add if ENOSPC) |
+| TS strict + include | `tsconfig.json` (`strict` + `noUnused*` + `noFallthroughCasesInSwitch`/`isolatedModules`/`noEmit` + `include: ["src","vite.config.ts"]` + `types: ["node"]` + `paths @/*`) |
+| Pre-ship gate (current) | `pnpm lint && pnpm typecheck && pnpm build` → `dist/index.html` + `dist/images/` (8 files) → `pnpm preview` → manual smoke (see §11). Full gate `lint && typecheck && test && test:e2e && build` once `e2e/` rewritten + unit tests restored |
+| Frozen reference | `src.orig/` — complete Rother Shrine original for diff reference (not built, not linted, not type-checked; 6 test files/29 tests reference) |
+| CSP allowlist | `index.html` — `img-src` `upload.wikimedia.org` + `images.pexels.com` (for `images.hero`/`naveCdn`/`courtyardCdn` via `SafeImage`), `frame-src` `google.com` (maps embed) |
