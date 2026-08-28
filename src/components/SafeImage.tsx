@@ -7,6 +7,8 @@ interface SafeImageProps {
   alt: string;
   className?: string;
   loading?: "lazy" | "eager";
+  /** Priority hint for above-the-fold (LCP) images; omit for below-fold imagery. */
+  fetchPriority?: "high" | "low" | "auto";
 }
 
 export function SafeImage({
@@ -15,6 +17,7 @@ export function SafeImage({
   alt,
   className,
   loading = "lazy",
+  fetchPriority,
 }: SafeImageProps) {
   const [current, setCurrent] = useState(src);
   const [loaded, setLoaded] = useState(false);
@@ -38,6 +41,7 @@ export function SafeImage({
       src={current}
       alt={alt}
       loading={loading}
+      fetchPriority={fetchPriority}
       className={cn(
         "transition-opacity duration-700",
         loaded ? "opacity-100" : "opacity-0",

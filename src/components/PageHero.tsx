@@ -34,6 +34,7 @@ export function PageHero({
         fallback={fallback}
         alt=""
         loading="eager"
+        fetchPriority="high"
         className="hero-ken-burns absolute inset-0 h-full w-full object-cover opacity-35"
       />
       <div className="absolute inset-0 bg-gradient-to-b from-shrine-maroon-950/35 via-shrine-maroon-950/72 to-shrine-maroon-950" />

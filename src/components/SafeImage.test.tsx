@@ -55,4 +55,14 @@ describe("SafeImage", () => {
     });
     expect(img.getAttribute("src")).toBe("/images/hero-church.jpg");
   });
+
+  it("omits fetchpriority by default and renders it when provided", () => {
+    const { container: low } = render(<SafeImage src="https://example.com/low.jpg" alt="no priority" />);
+    expect(low.querySelector("img")?.getAttribute("fetchpriority")).toBeNull();
+
+    const { container: high } = render(
+      <SafeImage src="https://example.com/hero.jpg" alt="high priority" fetchPriority="high" />,
+    );
+    expect(high.querySelector("img")?.getAttribute("fetchpriority")).toBe("high");
+  });
 });

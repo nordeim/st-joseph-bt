@@ -40,6 +40,7 @@ export function Home() {
           fallback={images.heroFallback}
           alt=""
           loading="eager"
+          fetchPriority="high"
           className="hero-ken-burns absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-shrine-maroon-950 via-shrine-maroon-950/55 to-shrine-maroon-950/25" />
