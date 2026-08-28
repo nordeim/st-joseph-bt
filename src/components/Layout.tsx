@@ -26,13 +26,13 @@ export function Layout() {
     if (id) {
       const el = document.getElementById(id);
       if (el) {
-        window.setTimeout(() => {
+        const timer = window.setTimeout(() => {
           el.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 80);
-        return;
+        return () => window.clearTimeout(timer);
       }
     }
-    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+    window.scrollTo({ top: 0, behavior: "auto" });
   }, [pathname, hash]);
 
   return (

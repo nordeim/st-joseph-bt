@@ -26,6 +26,10 @@ export function SafeImage({
   useEffect(() => {
     setCurrent(src);
     setLoaded(false);
+    if (imgRef.current) {
+      delete (imgRef.current.dataset as Record<string, string | undefined>).fallback;
+      imgRef.current.removeAttribute("data-fallback");
+    }
   }, [src]);
 
   useEffect(() => {

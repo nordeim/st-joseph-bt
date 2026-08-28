@@ -6,8 +6,11 @@ import { FacebookIcon } from "@/components/SocialIcons";
 import { footerNav } from "@/data/nav";
 import { site } from "@/data/site";
 
-const exploreLinks = footerNav.slice(0, 4);
-const involvedLinks = footerNav.slice(4);
+// Explicit grouping — avoids slice-index drift if footerNav is reordered.
+const exploreLinks = footerNav.filter((l) =>
+  ["/about", "/worship#mass", "/history", "/faq"].includes(l.to),
+);
+const involvedLinks = footerNav.filter((l) => !exploreLinks.includes(l));
 
 export function Footer() {
   return (
@@ -102,7 +105,7 @@ export function Footer() {
             <p className="flex items-start gap-2.5">
               <Phone className="mt-0.5 h-4 w-4 shrink-0 text-shrine-gold-300" aria-hidden="true" />
               <a
-                href={`tel:${site.contact.officePhone.replace(/\D/g, "")}`}
+                href={`tel:+${site.contact.officePhone.replace(/\D/g, "")}`}
                 className="hover:text-shrine-cream"
               >
                 {site.contact.officePhone}

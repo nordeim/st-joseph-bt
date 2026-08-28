@@ -31,20 +31,20 @@ export function NewsEvents() {
               <Reveal key={event.title} delay={(index % 2) * 80}>
                 <article className="card-lift flex h-full flex-col border border-shrine-stone bg-shrine-cream p-7">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="inline-flex items-center border border-shrine-gold-500/50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-shrine-gold-600">
+                    <p className="inline-flex items-center border border-shrine-gold-500/50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-shrine-maroon-600">
                       {event.category}
                     </p>
-                    <p className="font-display text-sm font-medium italic text-shrine-gold-600">{event.date}</p>
+                    <p className="font-display text-sm font-medium italic text-shrine-maroon-600">{event.date}</p>
                   </div>
                   <h3 className="mt-4 font-display text-2xl font-semibold text-shrine-maroon-700">
                     {event.title}
                   </h3>
-                  <p className="mt-3 flex-1 leading-relaxed text-shrine-charcoal/80">{event.summary}</p>
+                  <p className="mt-3 flex-1 leading-relaxed text-shrine-charcoal">{event.summary}</p>
                   {event.href ? (
                     <a
                       href={event.href}
                       className="link-underline mt-5 w-fit text-sm font-semibold text-shrine-maroon-600 hover:text-shrine-maroon-500"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       target="_blank"
                     >
                       Join the WhatsApp community →

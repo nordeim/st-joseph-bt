@@ -28,7 +28,9 @@ test.describe("Ministries — 6 sections", () => {
     await page.waitForTimeout(600);
     const srcs = await images.evaluateAll((els: HTMLImageElement[]) => els.map((e) => e.src));
     expect(srcs.length).toBe(6);
-    expect(srcs.every((s) => s.length > 0)).toBe(true);
+    // Assert CDN fallback actually fired — every src must be the local fallback, not the CDN.
+    expect(srcs.every((s) => s.includes("/images/"))).toBe(true);
+    expect(srcs.every((s) => !s.includes("pexels.com") && !s.includes("wikimedia.org"))).toBe(true);
   });
 
   test("jump nav via Link preserves HashRouter route", async ({ page }) => {

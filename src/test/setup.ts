@@ -1,11 +1,19 @@
 import "@testing-library/jest-dom/vitest";
 
-// jsdom lacks IntersectionObserver — mock for Reveal.tsx and other scroll-reveal usage
+// jsdom 26 ships throwing stubs for scrollTo/scrollIntoView/matchMedia and a
+// no-op IntersectionObserver — unconditionally replace with test-safe mocks.
 class MockIntersectionObserver implements IntersectionObserver {
   readonly root: Element | null = null;
   readonly rootMargin = "";
   readonly thresholds: readonly number[] = [];
-  observe() {}
+  constructor(private readonly callback: IntersectionObserverCallback) {}
+  observe(target: Element) {
+    // Immediately report intersecting so Reveal.tsx becomes visible in tests.
+    this.callback(
+      [{ isIntersecting: true, target } as IntersectionObserverEntry],
+      this as unknown as IntersectionObserver,
+    );
+  }
   unobserve() {}
   disconnect() {}
   takeRecords(): IntersectionObserverEntry[] {
@@ -13,30 +21,19 @@ class MockIntersectionObserver implements IntersectionObserver {
   }
 }
 
-if (!("IntersectionObserver" in globalThis)) {
-  globalThis.IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver;
-}
+globalThis.IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver;
 
-// jsdom lacks window.scrollTo + Element.scrollIntoView — stub to avoid
-// Layout/SkipLink errors in tests (jsdom has no layout engine)
-if (!window.scrollTo) {
-  window.scrollTo = () => {};
-}
-if (!Element.prototype.scrollIntoView) {
-  Element.prototype.scrollIntoView = () => {};
-}
+// Unconditional — jsdom's built-in throws "Not implemented".
+window.scrollTo = (() => {}) as unknown as typeof window.scrollTo;
+Element.prototype.scrollIntoView = (() => {}) as unknown as typeof Element.prototype.scrollIntoView;
 
-// jsdom lacks window.matchMedia — BackToTop consults prefers-reduced-motion
-if (!window.matchMedia) {
-  window.matchMedia = (query: string) =>
-    ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: () => {},
-      removeListener: () => {},
-      addEventListener: () => {},
-      removeEventListener: () => {},
-      dispatchEvent: () => false,
-    }) as unknown as MediaQueryList;
-}
+window.matchMedia = ((query: string) => ({
+  matches: query.includes("prefers-reduced-motion") ? false : false,
+  media: query,
+  onchange: null,
+  addListener: () => {},
+  removeListener: () => {},
+  addEventListener: () => {},
+  removeEventListener: () => {},
+  dispatchEvent: () => false,
+})) as unknown as typeof window.matchMedia;

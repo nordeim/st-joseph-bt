@@ -52,7 +52,7 @@ export function Accordion({ items }: AccordionProps) {
         const panelId = `${baseId}-panel-${index}`;
         const buttonId = `${baseId}-button-${index}`;
         return (
-          <div key={item.question}>
+          <div key={`${index}-${item.question}`}>
             <h3>
               <button
                 type="button"
@@ -76,15 +76,15 @@ export function Accordion({ items }: AccordionProps) {
               id={panelId}
               role="region"
               aria-labelledby={buttonId}
-              aria-hidden={!isOpen}
-              inert={!isOpen}
+              aria-hidden={isOpen ? undefined : true}
+              inert={!isOpen ? true : undefined}
               className={cn(
                 "grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none",
                 isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
               )}
             >
               <div className="overflow-hidden">
-                <p className="pb-5 leading-relaxed text-shrine-charcoal/80">{item.answer}</p>
+                <p className="pb-5 leading-relaxed text-shrine-charcoal">{item.answer}</p>
               </div>
             </div>
           </div>

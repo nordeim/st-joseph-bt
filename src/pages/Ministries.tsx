@@ -18,7 +18,7 @@ export function Ministries() {
         image={images.glass}
         fallback={images.glass}
       >
-        <nav aria-label="Jump to ministry" className="flex flex-wrap gap-3">
+        <nav aria-label="Jump to ministry" className="flex flex-wrap gap-2">
           {ministries.map((ministry) => {
             const active = hash === `#${ministry.id}`;
             return (
@@ -27,7 +27,7 @@ export function Ministries() {
                 to={`/ministries#${ministry.id}`}
                 aria-current={active ? "true" : undefined}
                 className={cn(
-                  "border px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors",
+                  "inline-flex min-h-11 items-center border px-5 py-3 text-xs font-semibold uppercase tracking-wide transition-colors",
                   active
                     ? "border-shrine-gold-300 bg-shrine-cream/10 text-shrine-gold-300"
                     : "border-shrine-cream/40 text-shrine-cream/90 hover:border-shrine-gold-300 hover:text-shrine-gold-300",
@@ -67,19 +67,19 @@ export function Ministries() {
                     />
                   </div>
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-shrine-gold-600">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-shrine-maroon-600">
                       0{index + 1} / 0{ministries.length}
                     </p>
                     <h2 className="mt-3 font-display text-3xl font-semibold text-shrine-maroon-700 sm:text-4xl">
                       {ministry.title}
                     </h2>
                     <div className="gold-rule-left mt-5 w-24" />
-                    <p className="mt-5 leading-relaxed text-shrine-charcoal/80">{ministry.summary}</p>
+                    <p className="mt-5 leading-relaxed text-shrine-charcoal">{ministry.summary}</p>
                     <ul className="mt-6 space-y-2.5">
                       {ministry.details.map((detail) => (
                         <li
                           key={detail}
-                          className="border-l-2 border-shrine-gold-500 pl-4 text-sm leading-relaxed text-shrine-charcoal/85"
+                          className="border-l-2 border-shrine-gold-500 pl-4 text-sm leading-relaxed text-shrine-charcoal"
                         >
                           {detail}
                         </li>

@@ -28,12 +28,12 @@ export function BackToTop() {
     <button
       type="button"
       aria-label="Back to top"
-      aria-hidden={!visible}
+      aria-hidden={visible ? undefined : true}
       tabIndex={visible ? 0 : -1}
       data-testid="back-to-top"
       onClick={scrollToTop}
       className={cn(
-        "fixed bottom-6 right-6 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-shrine-gold-300/40 bg-shrine-maroon-900 text-shrine-cream shadow-shrine transition-[opacity,transform,border-color,color] duration-300 ease-out hover:-translate-y-1 hover:border-shrine-gold-300 hover:text-shrine-gold-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-shrine-gold-500",
+        "fixed bottom-6 right-6 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-shrine-gold-300/40 bg-shrine-maroon-900 text-shrine-cream shadow-shrine transition-[opacity,transform] duration-300 ease-out hover:-translate-y-1 hover:border-shrine-gold-300 hover:text-shrine-gold-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-shrine-gold-500",
         visible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0",
       )}
     >

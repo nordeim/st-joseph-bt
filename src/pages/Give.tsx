@@ -64,7 +64,7 @@ export function Give() {
                     <h3 className="mt-4 font-display text-lg font-semibold text-shrine-maroon-700">
                       {option.name}
                     </h3>
-                    <p className="mt-2 flex-1 text-sm leading-relaxed text-shrine-charcoal/80">
+                    <p className="mt-2 flex-1 text-sm leading-relaxed text-shrine-charcoal">
                       {option.description}
                     </p>
                   </div>

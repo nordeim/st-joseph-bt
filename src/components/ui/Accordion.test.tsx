@@ -64,10 +64,10 @@ describe("Accordion", () => {
     expect(panels).toHaveLength(3);
     const open = panels[0] as HTMLElement;
     const closed = panels[1] as HTMLElement;
-    expect(open).toHaveAttribute("aria-hidden", "false");
+    expect(open).not.toHaveAttribute("aria-hidden");
     expect(open).not.toHaveAttribute("inert");
     expect(closed).toHaveAttribute("aria-hidden", "true");
-    expect(closed).toHaveAttribute("inert");
+    expect(closed).toHaveAttribute("inert", "");
   });
 
   it("collapse animation state follows the open item", async () => {
@@ -76,9 +76,9 @@ describe("Accordion", () => {
     const btn2 = screen.getByRole("button", { name: /Q2/ });
     await user.click(btn2);
     const panels = screen.getAllByRole("region", { hidden: true });
-    expect(panels[1]).toHaveAttribute("aria-hidden", "false");
+    expect(panels[1]).not.toHaveAttribute("aria-hidden");
     expect(panels[1]).not.toHaveAttribute("inert");
     expect(panels[0]).toHaveAttribute("aria-hidden", "true");
-    expect(panels[0]).toHaveAttribute("inert");
+    expect(panels[0]).toHaveAttribute("inert", "");
   });
 });

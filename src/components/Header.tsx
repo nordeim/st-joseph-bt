@@ -22,7 +22,7 @@ export function Header() {
     setMobileOpen(false);
     setOpenDesktopMenu(null);
     setOpenMobileSection(null);
-  }, [pathname]);
+  }, [pathname, hash]);
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
@@ -127,9 +127,11 @@ export function Header() {
                 <div className="absolute left-0 top-full z-50 min-w-[17.5rem] pt-2">
                   <ul
                     className="menu-in border border-shrine-stone bg-shrine-cream py-2 shadow-shrine-lg"
-                    onClickCapture={() =>
-                      setOpenDesktopMenu(null)
-                    }
+                    onClickCapture={(event) => {
+                      if ((event.target as HTMLElement).closest("a")) {
+                        setOpenDesktopMenu(null);
+                      }
+                    }}
                   >
                     {item.children.map((child) => (
                       <li key={child.to}>

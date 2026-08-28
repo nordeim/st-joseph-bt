@@ -99,7 +99,7 @@ export function Home() {
             <div className="relative">
               <SafeImage
                 src={images.chapel}
-                fallback={images.chapel}
+                fallback={images.heroFallback}
                 alt="Candlelit chapel of Saint Joseph"
                 className="aspect-[4/5] w-full object-cover shadow-shrine-lg"
               />
@@ -116,7 +116,7 @@ export function Home() {
               title="The carpenter's house, still open."
               description={site.tagline}
             />
-            <div className="mt-8 space-y-5 leading-relaxed text-shrine-charcoal/85">
+            <div className="mt-8 space-y-5 leading-relaxed text-shrine-charcoal">
               <p>
                 Every pilgrim who walks through these doors meets the same story: a French
                 missionary who learned Chinese, an attap chapel by the Kranji, and plantation
@@ -166,13 +166,13 @@ export function Home() {
                     />
                   </div>
                   <div className="flex flex-1 flex-col p-6">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-shrine-gold-600">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-shrine-maroon-600">
                       0{index + 1} / 03
                     </p>
                     <h3 className="mt-2 font-display text-2xl font-semibold text-shrine-maroon-700">
                       {place.title}
                     </h3>
-                    <p className="mt-3 flex-1 text-sm leading-relaxed text-shrine-charcoal/80">
+                    <p className="mt-3 flex-1 text-sm leading-relaxed text-shrine-charcoal">
                       {place.summary}
                     </p>
                     <span className="mt-5 text-xs font-semibold uppercase tracking-wide text-shrine-maroon-600">
@@ -202,14 +202,14 @@ export function Home() {
             {upcomingEvents.slice(0, 4).map((event, index) => (
               <Reveal key={event.title} delay={index * 70}>
                 <article className="card-lift flex h-full flex-col border border-shrine-stone bg-shrine-cream p-6">
-                  <p className="inline-flex w-fit items-center border border-shrine-gold-500/50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-shrine-gold-600">
+                  <p className="inline-flex w-fit items-center border border-shrine-gold-500/50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-shrine-maroon-600">
                     {event.category}
                   </p>
                   <h3 className="mt-3 font-display text-xl font-semibold text-shrine-maroon-700">
                     {event.title}
                   </h3>
-                  <p className="mt-1 font-display text-sm font-medium italic text-shrine-gold-600">{event.date}</p>
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-shrine-charcoal/80">
+                  <p className="mt-1 font-display text-sm font-medium italic text-shrine-maroon-600">{event.date}</p>
+                  <p className="mt-3 flex-1 text-sm leading-relaxed text-shrine-charcoal">
                     {event.summary}
                   </p>
                 </article>

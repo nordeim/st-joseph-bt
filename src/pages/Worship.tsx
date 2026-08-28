@@ -90,11 +90,11 @@ export function Worship() {
           </Reveal>
           <div className="mx-auto mt-10 max-w-3xl border border-shrine-stone bg-shrine-cream p-8 text-center">
             <p className="font-display text-2xl text-shrine-maroon-700">Confession</p>
-            <p className="mt-3 leading-relaxed text-shrine-charcoal/80">{site.mass.confession}</p>
-            <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.22em] text-shrine-gold-600">
+            <p className="mt-3 leading-relaxed text-shrine-charcoal">{site.mass.confession}</p>
+            <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.22em] text-shrine-maroon-600">
               Adoration
             </p>
-            <p className="mt-2 text-shrine-charcoal/80">{site.mass.adoration}</p>
+            <p className="mt-2 text-shrine-charcoal">{site.mass.adoration}</p>
           </div>
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {devotions.map((item, index) => (
@@ -103,7 +103,7 @@ export function Worship() {
                   <h3 className="font-display text-lg font-semibold text-shrine-maroon-700">
                     {item.title}
                   </h3>
-                  <p className="mt-2 text-sm text-shrine-charcoal/80">{item.when}</p>
+                  <p className="mt-2 text-sm text-shrine-charcoal">{item.when}</p>
                   <p className="mt-1 text-xs uppercase tracking-[0.18em] text-shrine-maroon-500">
                     {item.where}
                   </p>
@@ -122,7 +122,7 @@ export function Worship() {
               title="620 Upper Bukit Timah Road"
               description="Gates open daily. For baptism, marriage, Mass intentions, or columbarium enquiries, telephone the Parish Office rather than assuming a walk-in appointment."
             />
-            <ul className="mt-8 space-y-4 text-sm text-shrine-charcoal/85">
+            <ul className="mt-8 space-y-4 text-sm text-shrine-charcoal">
               <li className="flex gap-3">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-shrine-maroon-600" aria-hidden="true" />
                 {site.address.full}

@@ -1,10 +1,10 @@
 ---
 name: st-joseph-bt
 display_name: St Joseph's Church (Bukit Timah) — Singapore
-version: 1.2.0
-last_updated: 2026-08-28T15:30Z
-project_state: static SPA — 11 files / 67 unit tests + 27 E2E green (ported from rothershrine v1.3.0, harness + E2E rewritten for Bukit Timah; 2026-08-28 audit remediation: mobile drawer same-route close fix + fetchPriority heroes + doc contract repair; 2026-08-28 "Sacred Motion" UI/UX package: staged hero entrances, animated accordion/dropdown/drawer, card-lift system, link underline, timeline halo, BackToTop, aria-current nav states, 44px targets), lint+typecheck+test+test:e2e+build green, singlefile deploy (pinned exact, pnpm 11)
-verified: pnpm lint 0 + pnpm typecheck 0 + pnpm test 11/67 + pnpm test:e2e 27 + pnpm build 383.7kB → dist/index.html + dist/images/8
+version: 1.2.1
+last_updated: 2026-08-29T07:01Z
+project_state: static SPA — 11 files / 67 unit tests + 27 E2E green (ported from rothershrine v1.3.0, harness + E2E rewritten for Bukit Timah; 2026-08-28 audit remediation: mobile drawer same-route close fix + fetchPriority heroes + doc contract repair; 2026-08-28 "Sacred Motion" UI/UX package: staged hero entrances, animated accordion/dropdown/drawer, card-lift system, link underline, timeline halo, BackToTop, aria-current nav states, 44px targets; 2026-08-29 remediation: SafeImage fallback reset, jsdom harness unconditional mocks, Ministries 44px pills, AAA contrast (charcoal/gold→charcoal/maroon), Layout timeout cleanup, Button rel+regex hardening), lint+typecheck+test+test:e2e+build green, singlefile deploy (pinned exact, pnpm 11)
+verified: pnpm lint 0 + pnpm typecheck 0 + pnpm test 11/67 + pnpm test:e2e 27 + pnpm build 384.6kB → dist/index.html + dist/images/8
 stack: react 19.2.8 / vite 7.3.6 / tailwind 4.3.3 (@tailwindcss/vite 4.1.17) / typescript 5.9.3 / react-router 7.18.2 / singlefile 2.3.3 / eslint 9.39.5 flat / vitest 3.2.6 jsdom / testing-library 16.2.0 / playwright 1.55.1 chromium (27 E2E green)
 rendering: static SPA (HashRouter, no SSR)
 data_layer: file-backed typed arrays in src/data/* + const site object

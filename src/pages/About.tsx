@@ -45,11 +45,11 @@ export function About() {
             {pillars.map((pillar, index) => (
               <Reveal key={pillar.title} delay={index * 80}>
                 <article className="card-lift h-full border border-shrine-stone bg-shrine-parchment p-7">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-shrine-gold-600">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-shrine-maroon-600">
                     0{index + 1}
                   </p>
                   <h3 className="mt-3 font-display text-2xl font-semibold">{pillar.title}</h3>
-                  <p className="mt-3 leading-relaxed text-shrine-charcoal/80">{pillar.body}</p>
+                  <p className="mt-3 leading-relaxed text-shrine-charcoal">{pillar.body}</p>
                 </article>
               </Reveal>
             ))}
@@ -78,8 +78,8 @@ export function About() {
                   </h3>
                   {priest.phone ? (
                     <a
-                      href={`tel:${priest.phone.replace(/\D/g, "")}`}
-                      className="mt-3 inline-block text-sm text-shrine-charcoal/80 hover:text-shrine-maroon-600"
+                      href={`tel:+${priest.phone.replace(/\D/g, "")}`}
+                      className="mt-3 inline-block text-sm text-shrine-charcoal hover:text-shrine-maroon-600"
                     >
                       {priest.phone}
                     </a>
@@ -125,7 +125,7 @@ export function About() {
                       <th scope="row" className="px-4 py-3 font-medium text-shrine-maroon-700">
                         {member.role}
                       </th>
-                      <td className="px-4 py-3 text-shrine-charcoal/85">{member.name}</td>
+                      <td className="px-4 py-3 text-shrine-charcoal">{member.name}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -32,11 +32,11 @@ export function Serve() {
             {serveRoles.map((role, index) => (
               <Reveal key={role.title} delay={index * 70}>
                 <article className="card-lift h-full border border-shrine-stone bg-shrine-parchment p-8">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-shrine-gold-600">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-shrine-maroon-600">
                     0{index + 1}
                   </p>
                   <h3 className="mt-3 font-display text-2xl font-semibold">{role.title}</h3>
-                  <p className="mt-3 leading-relaxed text-shrine-charcoal/80">{role.description}</p>
+                  <p className="mt-3 leading-relaxed text-shrine-charcoal">{role.description}</p>
                 </article>
               </Reveal>
             ))}

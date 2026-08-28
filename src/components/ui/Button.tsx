@@ -45,9 +45,7 @@ export function Button(props: ButtonProps) {
   const classes = cn(baseClasses, variantClasses[props.variant ?? "primary"], props.className);
 
   if ("to" in props && props.to) {
-    const { to, variant, children, className, icon, ...anchorRest } = props;
-    void variant;
-    void className;
+    const { to, variant: _variant, children, className: _className, icon, ...anchorRest } = props;
     return (
       <Link to={to} className={classes} {...anchorRest}>
         {children}
@@ -57,16 +55,14 @@ export function Button(props: ButtonProps) {
   }
 
   if ("href" in props && props.href) {
-    const { href, variant, children, className, icon, ...anchorRest } = props;
-    void variant;
-    void className;
-    const external = href.startsWith("http");
+    const { href, variant: _variant, children, className: _className, icon, ...anchorRest } = props;
+    const external = /^https?:\/\//.test(href);
     return (
       <a
         href={href}
         className={classes}
-        {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
         {...anchorRest}
+        {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       >
         {children}
         {icon}
@@ -74,9 +70,8 @@ export function Button(props: ButtonProps) {
     );
   }
 
-  const { variant, children, className, icon, ...buttonRest } = props as NativeButtonProps;
-  void variant;
-  void className;
+  const { variant: _variant, children, className: _className, icon, ...buttonRest } =
+    props as NativeButtonProps;
   return (
     <button type="button" className={classes} {...buttonRest}>
       {children}

@@ -105,7 +105,7 @@ flowchart TB
 ├── 📂 src/
 │   ├── 📄 App.tsx           # HashRouter + 17 Route entries (16 content paths + * → NotFound; 5 alias groups / 7 alias paths; hash anchors #mass/#confession/#visit + 6 ministry ids)
 │   ├── 📄 main.tsx          # StrictMode + createRoot
-│   ├── 📄 index.css         # @theme shrine-* tokens (24 colors + 2 shadows) + @layer base/utilities (text-balance, bg-adobe-texture, bg-grain, divider-weave, divider-weave-thin, gold-rule, gold-rule-left, mask-fade-b, hero-ken-burns, reveal/reveal-visible, skip-link)
+│   ├── 📄 index.css         # @theme shrine-* tokens (24 colors + 2 shadows) + @layer base/utilities (22 utilities: text-balance, bg-adobe-texture, bg-grain, divider-weave, divider-weave-thin, gold-rule, gold-rule-left, hero-ken-burns, mask-fade-b, reveal, reveal-visible, rise-in + rise-in-d1..d4, menu-in, drawer-in, dot-pulse, card-lift, link-underline, skip-link + 6 keyframes gold-rule-draw/hero-ken-burns/rise-in/menu-in/drawer-in/halo-pulse)
 │   ├── 📂 components/
 │   │   ├── 📄 Layout.tsx    # Outlet + scroll/hash restoration (double-hash aware, split on #, strip /, setTimeout 80ms, fallback window.scrollTo) + SkipLink
 │   │   ├── 📄 Header.tsx    # fixed maroon-950 bar, useScrolled(16), hover+click dropdown (primaryNav), mobile drawer (closes on any in-drawer link activation — same-route taps included)

@@ -23,7 +23,7 @@ export function Timeline({ entries = lifeTimeline }: TimelineProps) {
           <h3 className="mt-2 font-display text-xl font-semibold text-shrine-maroon-700 sm:text-2xl">
             {entry.title}
           </h3>
-          <p className="mt-2 max-w-2xl leading-relaxed text-shrine-charcoal/80">{entry.description}</p>
+          <p className="mt-2 max-w-2xl leading-relaxed text-shrine-charcoal">{entry.description}</p>
         </Reveal>
       ))}
     </ol>

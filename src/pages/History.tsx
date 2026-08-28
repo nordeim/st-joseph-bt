@@ -52,7 +52,7 @@ export function History() {
               title="Stations, a rosary walk, a cemetery"
               description="In 1991 life-sized Stations of the Cross were set around the boundary; in Lent, Catholics still retrace the road to Calvary here. The Rosary Garden, blessed in 2017, holds Fr Mauduit's headstone. The cemetery remains the last of its kind at a Catholic church in Singapore."
             />
-            <p className="mt-6 leading-relaxed text-shrine-charcoal/80">
+            <p className="mt-6 leading-relaxed text-shrine-charcoal">
               Architecture on the rebuilt church — blessed in 1964, consecrated on the feast in
               2012 — carries both Gothic-Romanesque lines and the parish's Chinese heritage. The
               feast-day fair Fr Joachim Teng began in the 1950s is still how the hill keeps
