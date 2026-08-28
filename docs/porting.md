@@ -190,5 +190,44 @@ Risks & mitigations: Pexels CDN abort timing → assert “all src non-empty” 
  
 ---
  
-Effort: ~1.7d total. Smallest increment that restores confidence is Phase 1+2 (unit) then Phase 3 (E2E) — either can land independently.
+Restored — full gate is green. 
+ 
+### What was done 
+ 
+- Harness re-added: vite.config.ts test { globals, jsdom, setupFiles: src/test/setup.ts, exclude: e2e/** } + server.watch.ignored 
+  [skills/**,dist/**,playwright-report/**,test-results/**,coverage/**,src.orig/**] + tsconfig.json include [src,vite.config.ts,eslint.config.js,playwright.config.ts] + types [node,vitest/globals] + created 
+  src/test/setup.ts (verbatim from src.orig — jest-dom + IntersectionObserver mock + scrollTo/scrollIntoView stubs) 
+ 
+- Unit tests — 8 files / 48 tests (all from src.orig pattern, adapted to Bukit Timah): 
+  src/utils/cn 5 · src/data/nav 7 (primaryNav 6, 3 with children → Worship #mass|#confession|#visit + Ministries #liturgical|#faith-formation|#pastoral-care, footerNav 10) · src/data/content 10 (lifeTimeline 8 
+  1845–2017, grounds 3, ministries 6, faqs 6, upcomingEvents 6 Parish|Devotion|Formation|Archdiocese, givingOptions 8 PayNow/SSVP/GIFT, priests 3, ppcMembers 16, images 11, serveRoles/devotions) · 
+  src/data/site 6 (620 Upper Bukit Timah 678116, maps, UEN T08CC4043C, hours/mass/feast 1 May) · src/components/ui/Button 8 · src/components/SkipLink 3 (hash-preserving) · src/components/ui/Accordion 4 · 
+  src/components/SafeImage 5 (fallback /images/hero-church.jpg) 
+ 
+- E2E — rewrote 4 specs / 21 tests (deleted what-to-see.spec.ts): 
+  smoke 7 (hero “A church on the hill since 1846.”, Worship aliases /mass-times//hours-location//visit, Ministries alias /ministry, hash #mass/#confession/#visit + #liturgical/#faith-formation, NotFound “does  
+  not lead to the church”, mobile drawer) · navigation 6 (Worship + Ministries hover aria-expanded + descriptions, SkipLink keyboard hash-preserving, footer 10 links → #liturgical//history//serve, Give top 
+  bar) · ministries 4 (6 sections imageAlt, CDN abort fallback Wikimedia+Pexels, jump nav <Link to="/ministries#…"> preserves HashRouter, Home grounds → Worship anchors) · give-faq 4 (Give 8 PayNow/Cheque/GIFT 
+  with alias /donate + external catholicfoundation.sg, FAQ single-open aria-expanded, Worship Find Us + mapsEmbedSrc iframe, Footer Give) 
+ 
+### Verification 
+ 
+``` 
+  pnpm lint       — 0 warnings 
+  pnpm typecheck  — 0 errors 
+  pnpm test       — 8 files / 48 passed 
+  pnpm test:e2e   — 21 passed (chromium) 
+  pnpm build      — 375.71 kB singlefile + dist/images 8 files 
+``` 
+ 
+Gate is now pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build — CI mirrors it (Node 24, pnpm 11, --frozen-lockfile + playwright install --with-deps chromium). 
+ 
+### Docs synced 
+ 
+- AGENTS.md: Commands now show 8/48 + 21, Structure 35 files (26+8+1), harness + watch.ignored + SkipLink notes updated, stale banner removed 
+- README.md: Tech Stack 48+21, vite.config.ts/tsconfig.json lines, File Hierarchy with src/test + **/*.test.*, Verify Setup expects 48/21 
+- CLAUDE.md: TS Strict types [vitest/globals] + include, Vite test+watch.ignored restored, Build Commands 5-step, Testing Strategy rewritten as green, Architecture 35 files, Validation Checklist updated 
+- rothershrine-v2_SKILL.md: header 8/48+21 green, e2e 21 green, counts 35 
+ 
+Next: branch feat/restore-tests → squash-merge; CI will pass without the previous hollow-type hole.
 

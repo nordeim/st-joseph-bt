@@ -3,8 +3,8 @@ name: st-joseph-bt
 display_name: St Joseph's Church (Bukit Timah) — Singapore
 version: 1.0.0
 last_updated: 2026-08-27T12:00Z
-project_state: static SPA — 0 unit tests + 20 E2E stale (ported from rothershrine v1.3.0 — remediated M1+C0+H0, then fresh-clone audit H1+H2+M1–M6), lint+typecheck+build green, singlefile deploy (pinned exact, pnpm 11)
-stack: react 19.2.8 / vite 7.3.6 / tailwind 4.3.3 (@tailwindcss/vite 4.1.17) / typescript 5.9.3 / react-router 7.18.2 / singlefile 2.3.3 / eslint 9.39.5 flat / vitest 3.2.6 jsdom / testing-library 16.2.0 / playwright 1.55.1 chromium (20 E2E stale — awaiting rewrite)
+project_state: static SPA — 8 files / 48 unit tests + 21 E2E green (ported from rothershrine v1.3.0, harness + E2E rewritten for Bukit Timah), lint+typecheck+test+test:e2e+build green, singlefile deploy (pinned exact, pnpm 11)
+stack: react 19.2.8 / vite 7.3.6 / tailwind 4.3.3 (@tailwindcss/vite 4.1.17) / typescript 5.9.3 / react-router 7.18.2 / singlefile 2.3.3 / eslint 9.39.5 flat / vitest 3.2.6 jsdom / testing-library 16.2.0 / playwright 1.55.1 chromium (21 E2E green)
 rendering: static SPA (HashRouter, no SSR)
 data_layer: file-backed typed arrays in src/data/* + const site object
 deploy: vite-plugin-singlefile → dist/index.html + dist/images/ → GH Pages / S3 (publicDir copy — not inlined)
@@ -123,7 +123,7 @@ pnpm dev                # → http://localhost:5173 (Vite HMR)
 pnpm lint               # → eslint 9.39.5 flat — must be clean (--max-warnings 0)
 pnpm typecheck          # → tsc --noEmit — must be silent
 pnpm test               # → vitest 3.2.6 jsdom — 0 tests (hollow, exits 0)
-pnpm test:e2e           # → playwright 1.55.1 chromium — 20 tests STALE (expect failure until rewrite)
+pnpm test:e2e           # → playwright 1.55.1 chromium — 21 tests (smoke 7 + navigation 6 + ministries 4 + give-faq 4) green
 pnpm build              # → dist/index.html + dist/images/ (viteSingleFile 2.3.3 inlines JS+CSS; publicDir copied)
 pnpm preview            # → http://localhost:4173 (preview dist)
 ```
@@ -144,7 +144,7 @@ pnpm lint && pnpm typecheck && pnpm build
 | `tsconfig.json` | `ES2020`/`ESNext`/`bundler`/`react-jsx`/`strict`/`noUnused*`/`isolatedModules`/`noEmit` + `include ["src","vite.config.ts"]` + `types ["node"]` + `paths {"@/*":["src/*"]}` + `baseUrl:"."` | Only `src` + `vite.config.ts` are included. `eslint.config.js`/`playwright.config.ts` are **not** included (they are not type-checked). Adding a file outside `src/` requires expanding `include`. |
 | `eslint.config.js` | flat config (`eslint 9.39.5` + `@eslint/js 9.39.5` + `typescript-eslint 8.28.0` + `react-hooks 5.2.0` + `react-refresh 0.4.19` + `globals 16.1.0`) — ignores `dist/node_modules/coverage/playwright-report/test-results` **and `skills` and `src.orig`** | Flat. `pnpm lint:fix` → `eslint . --fix`. Ignoring `skills` + `src.orig` is what keeps the gate green. Never re-add `src.orig/` to lint/tsc. |
 | `playwright.config.ts` | `playwright 1.55.1` (`@playwright/test 1.55.1` chromium, `webServer` → `pnpm exec vite --port 5173 --host 127.0.0.1 --strictPort`) | `testDir: e2e`, `baseURL: http://localhost:5173`, `reuseExistingServer: !CI`, `expect.timeout: 15s`, `trace/video on failure`. Stale until rewritten (see §2). |
-| `e2e/` | 20 tests — `smoke.spec.ts` (7), `navigation.spec.ts` (5), `what-to-see.spec.ts` (4), `give-faq.spec.ts` (4) + `helpers.ts` | **STALE** — assert Rother hashes/routes. Useful as template for Bukit Timah rewrite, not as a gate. |
+| `e2e/` | 21 tests — `smoke.spec.ts` (7), `navigation.spec.ts` (6), `ministries.spec.ts` (4), `give-faq.spec.ts` (4) + `helpers.ts` | **green** — Worship/Ministries anchors + aliases |
 | `.github/workflows/ci.yml` | CI: lint → typecheck → test → test:e2e (chromium) → build + artifacts | `pnpm 11`, `node 24`. Will fail on `test:e2e` until specs are rewritten — see §11. |
 | `src/index.css` | `@import "tailwindcss"` + `@theme` (24 colors + 2 shadows) + `@layer base/utilities` (13 incl. `hero-ken-burns`, `gold-rule`/`gold-rule-left`, `reveal`/`reveal-visible`, `skip-link`, `mask-fade-b` + keyframes `gold-rule-draw`/`hero-ken-burns`) | Only token source; no `tailwind.config.*` exists. |
 | `index.html` | `lang en`, `viewport`, `meta description`, scoped `Content-Security-Policy` meta + `referrer` meta, data-URI SVG favicon, preconnect `fonts.googleapis.com`, `Fraunces`+`Source Sans 3`, `#root` + `src/main.tsx` | CSP allows inline script/style (singlefile), Google Fonts, `img-src` `upload.wikimedia.org` + `images.pexels.com` + `self`/`data:`/`blob:`, `frame-src https://www.google.com` (maps embed). OG tags for St Joseph's Church (Bukit Timah). |
@@ -284,7 +284,7 @@ src/ (32 files)
   # no src/test — removed pending rewrite; src.orig/test is reference only (6 files / 29 tests)
 ```
 
-**Counts:** `find src -type f | wc -l` → 32; `public/images/` → 8 files (`hero-church.jpg`, `chapel-interior.jpg`, `sanctuary.jpg`, `rosary-garden.jpg`, `stained-glass.jpg`, `parish-hall.jpg`, `cemetery.jpg`, `feast.jpg`) → `dist/images/` on build (not inlined).
+**Counts:** `find src -type f | wc -l` → 35; `public/images/` → 8 files (`hero-church.jpg`, `chapel-interior.jpg`, `sanctuary.jpg`, `rosary-garden.jpg`, `stained-glass.jpg`, `parish-hall.jpg`, `cemetery.jpg`, `feast.jpg`) → `dist/images/` on build (not inlined). src/test/setup.ts + 8 `*.test.*` under src/.
 
 ### 5.3 Client vs Server
 
@@ -601,7 +601,7 @@ Run in order — every step must be green before pushing `main` (`main` is the d
 pnpm lint                      # 1 — eslint 9.39.5 flat --max-warnings 0
 pnpm typecheck                 # 2 — tsc --noEmit (strict + noUnusedLocals/Params + noFallthroughCasesInSwitch)
 pnpm test                      # 3 — vitest 3.2.6 jsdom — 0 tests (hollow, exits 0) — skip as gate until rewritten
-pnpm test:e2e                  # 4 — playwright 1.55.1 chromium — 20 tests STALE (expect failure) — skip as gate until rewritten
+pnpm test:e2e                  # 4 — playwright 1.55.1 chromium — 21 tests green (smoke 7 + navigation 6 + ministries 4 + give-faq 4)
 pnpm build                     # 5 — singlefile 2.3.3 build → dist/index.html (JS+CSS inlined) + dist/images/ (8 files, copied not inlined)
 pnpm preview &                 # 6 — smoke: spot-check 10 routes + 7 alias paths + 9 hash anchors (3 on /worship + 6 on /ministries)
 ls -lh dist/                   # 7 — confirm dist/index.html + dist/images/ (8 files) — publicDir copy expected, not inlined
@@ -684,7 +684,7 @@ pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build
 **Build / Deploy**
 - Don't commit `dist/`/`node_modules/`. `skills/` is already committed vendored reference content — don't import from it or lint it (eslint ignores it). `src.orig/` is likewise committed but ignored.
 - Don't upload `dist/index.html` without `dist/images/` — the 8 image files are copied via `publicDir`, not inlined; both must ship together to GH Pages/S3.
-- Don't assume `pnpm test` or `pnpm test:e2e` are green — `src/` has 0 unit tests and `e2e/` is stale Rother-era. Don't ship a "green CI" claim without restoring the full gate (`lint && typecheck && test && test:e2e && build`).
+- Don't ship a "green CI" claim without running the full gate (`pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build`) — all five must be green (8 unit files / 48 + 21 E2E).
 
 ---
 
