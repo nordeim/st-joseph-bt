@@ -48,17 +48,17 @@ export function Home() {
         <div className="bg-grain pointer-events-none absolute inset-0" />
 
         <Container className="relative z-10 w-full pb-28 pt-36 sm:pb-32 sm:pt-44">
-          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-shrine-gold-300">
+          <p className="rise-in text-xs font-semibold uppercase tracking-[0.32em] text-shrine-gold-300">
             Saint Joseph&apos;s Church · Bukit Timah · {site.chineseName}
           </p>
-          <h1 className="mt-5 max-w-3xl text-balance font-display text-4xl font-semibold text-shrine-cream sm:text-6xl lg:text-7xl">
+          <h1 className="rise-in rise-in-d1 mt-5 max-w-3xl text-balance font-display text-4xl font-semibold text-shrine-cream sm:text-6xl lg:text-7xl">
             A church on the hill since 1846.
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-shrine-cream/80">
+          <p className="rise-in rise-in-d2 mt-6 max-w-xl text-lg leading-relaxed text-shrine-cream/80">
             Singapore&apos;s second-oldest Catholic parish still gathers plantation-country
             families and city neighbours under the patronage of St Joseph the Worker.
           </p>
-          <div className="mt-9 flex flex-wrap gap-4">
+          <div className="rise-in rise-in-d3 mt-9 flex flex-wrap gap-4">
             <Button to="/worship" variant="primary">
               Mass times
             </Button>
@@ -73,8 +73,14 @@ export function Home() {
         <Container>
           <div className="grid gap-px overflow-hidden border border-shrine-stone bg-shrine-stone shadow-shrine sm:grid-cols-2 lg:grid-cols-4">
             {facts.map((fact) => (
-              <div key={fact.label} className="bg-shrine-cream px-5 py-6">
-                <fact.icon className="h-5 w-5 text-shrine-maroon-600" aria-hidden="true" />
+              <div
+                key={fact.label}
+                className="group bg-shrine-cream px-5 py-6 transition-colors duration-300 hover:bg-shrine-maroon-50"
+              >
+                <fact.icon
+                  className="h-5 w-5 text-shrine-maroon-600 transition-transform duration-300 group-hover:-translate-y-0.5"
+                  aria-hidden="true"
+                />
                 <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-shrine-maroon-500">
                   {fact.label}
                 </p>
@@ -149,7 +155,7 @@ export function Home() {
               <Reveal key={place.id} delay={index * 90}>
                 <Link
                   to={`/worship#${place.id === "main-church" ? "mass" : place.id === "chapel" ? "confession" : "visit"}`}
-                  className="group flex h-full flex-col bg-shrine-cream shadow-shrine transition-transform duration-300 hover:-translate-y-1"
+                  className="card-lift group flex h-full flex-col bg-shrine-cream shadow-shrine"
                 >
                   <div className="overflow-hidden">
                     <SafeImage
@@ -195,14 +201,14 @@ export function Home() {
           <div className="mt-12 grid gap-6 md:grid-cols-2">
             {upcomingEvents.slice(0, 4).map((event, index) => (
               <Reveal key={event.title} delay={index * 70}>
-                <article className="flex h-full flex-col border border-shrine-stone bg-shrine-cream p-6">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-shrine-terracotta-500">
+                <article className="card-lift flex h-full flex-col border border-shrine-stone bg-shrine-cream p-6">
+                  <p className="inline-flex w-fit items-center border border-shrine-gold-500/50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-shrine-gold-600">
                     {event.category}
                   </p>
                   <h3 className="mt-3 font-display text-xl font-semibold text-shrine-maroon-700">
                     {event.title}
                   </h3>
-                  <p className="mt-1 text-sm font-medium text-shrine-gold-600">{event.date}</p>
+                  <p className="mt-1 font-display text-sm font-medium italic text-shrine-gold-600">{event.date}</p>
                   <p className="mt-3 flex-1 text-sm leading-relaxed text-shrine-charcoal/80">
                     {event.summary}
                   </p>

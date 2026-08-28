@@ -29,12 +29,12 @@ export function NewsEvents() {
           <div className="mt-14 grid gap-6 lg:grid-cols-2">
             {upcomingEvents.map((event, index) => (
               <Reveal key={event.title} delay={(index % 2) * 80}>
-                <article className="flex h-full flex-col border border-shrine-stone bg-shrine-cream p-7">
+                <article className="card-lift flex h-full flex-col border border-shrine-stone bg-shrine-cream p-7">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-shrine-terracotta-500">
+                    <p className="inline-flex items-center border border-shrine-gold-500/50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-shrine-gold-600">
                       {event.category}
                     </p>
-                    <p className="text-xs font-medium text-shrine-gold-600">{event.date}</p>
+                    <p className="font-display text-sm font-medium italic text-shrine-gold-600">{event.date}</p>
                   </div>
                   <h3 className="mt-4 font-display text-2xl font-semibold text-shrine-maroon-700">
                     {event.title}
@@ -43,7 +43,7 @@ export function NewsEvents() {
                   {event.href ? (
                     <a
                       href={event.href}
-                      className="mt-5 text-sm font-semibold text-shrine-maroon-600 hover:text-shrine-maroon-500"
+                      className="link-underline mt-5 w-fit text-sm font-semibold text-shrine-maroon-600 hover:text-shrine-maroon-500"
                       rel="noreferrer"
                       target="_blank"
                     >

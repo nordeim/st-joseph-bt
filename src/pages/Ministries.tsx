@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { PageHero } from "@/components/PageHero";
 import { SafeImage } from "@/components/SafeImage";
 import { Button } from "@/components/ui/Button";
@@ -8,6 +8,7 @@ import { images, ministries } from "@/data/content";
 import { cn } from "@/utils/cn";
 
 export function Ministries() {
+  const { hash } = useLocation();
   return (
     <div>
       <PageHero
@@ -18,15 +19,24 @@ export function Ministries() {
         fallback={images.glass}
       >
         <nav aria-label="Jump to ministry" className="flex flex-wrap gap-3">
-          {ministries.map((ministry) => (
-            <Link
-              key={ministry.id}
-              to={`/ministries#${ministry.id}`}
-              className="border border-shrine-cream/40 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-shrine-cream/90 transition-colors hover:border-shrine-gold-300 hover:text-shrine-gold-300"
-            >
-              {ministry.title}
-            </Link>
-          ))}
+          {ministries.map((ministry) => {
+            const active = hash === `#${ministry.id}`;
+            return (
+              <Link
+                key={ministry.id}
+                to={`/ministries#${ministry.id}`}
+                aria-current={active ? "true" : undefined}
+                className={cn(
+                  "border px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors",
+                  active
+                    ? "border-shrine-gold-300 bg-shrine-cream/10 text-shrine-gold-300"
+                    : "border-shrine-cream/40 text-shrine-cream/90 hover:border-shrine-gold-300 hover:text-shrine-gold-300",
+                )}
+              >
+                {ministry.title}
+              </Link>
+            );
+          })}
         </nav>
       </PageHero>
 
@@ -53,7 +63,7 @@ export function Ministries() {
                       src={ministry.image}
                       fallback={ministry.imageFallback}
                       alt={ministry.imageAlt}
-                      className="aspect-[16/11] w-full object-cover"
+                      className="aspect-[16/11] w-full object-cover transition-transform duration-700 ease-out hover:scale-105"
                     />
                   </div>
                   <div>

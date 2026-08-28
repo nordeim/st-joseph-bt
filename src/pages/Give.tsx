@@ -57,8 +57,8 @@ export function Give() {
               const Icon = iconMap[option.icon];
               return (
                 <Reveal key={option.name} delay={(index % 4) * 90}>
-                  <div className="flex h-full flex-col border border-shrine-stone bg-shrine-cream p-6 transition-shadow hover:shadow-shrine">
-                    <span className="flex h-11 w-11 items-center justify-center rounded-full bg-shrine-maroon-50 text-shrine-maroon-600">
+                  <div className="card-lift group flex h-full flex-col border border-shrine-stone bg-shrine-cream p-6">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-full bg-shrine-maroon-50 text-shrine-maroon-600 ring-1 ring-shrine-stone transition-colors duration-300 group-hover:text-shrine-gold-600">
                       <Icon className="h-5 w-5" aria-hidden="true" />
                     </span>
                     <h3 className="mt-4 font-display text-lg font-semibold text-shrine-maroon-700">

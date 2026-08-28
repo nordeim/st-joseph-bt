@@ -38,25 +38,25 @@ export function Worship() {
           </Reveal>
           <Reveal delay={80}>
             <dl className="divide-y divide-shrine-stone border-y border-shrine-stone">
-              <div className="grid gap-2 py-5 sm:grid-cols-[9rem_1fr]">
+              <div className="grid gap-2 px-3 py-5 transition-colors duration-200 hover:bg-shrine-maroon-50/60 sm:grid-cols-[9rem_1fr] sm:px-4">
                 <dt className="text-xs font-semibold uppercase tracking-[0.2em] text-shrine-maroon-500">
                   Weekday morning
                 </dt>
                 <dd>{site.mass.weekdayMorning}</dd>
               </div>
-              <div className="grid gap-2 py-5 sm:grid-cols-[9rem_1fr]">
+              <div className="grid gap-2 px-3 py-5 transition-colors duration-200 hover:bg-shrine-maroon-50/60 sm:grid-cols-[9rem_1fr] sm:px-4">
                 <dt className="text-xs font-semibold uppercase tracking-[0.2em] text-shrine-maroon-500">
                   Weekday evening
                 </dt>
                 <dd>{site.mass.weekdayEvening}</dd>
               </div>
-              <div className="grid gap-2 py-5 sm:grid-cols-[9rem_1fr]">
+              <div className="grid gap-2 px-3 py-5 transition-colors duration-200 hover:bg-shrine-maroon-50/60 sm:grid-cols-[9rem_1fr] sm:px-4">
                 <dt className="text-xs font-semibold uppercase tracking-[0.2em] text-shrine-maroon-500">
                   Saturday
                 </dt>
                 <dd>{site.mass.saturday}</dd>
               </div>
-              <div className="grid gap-2 py-5 sm:grid-cols-[9rem_1fr]">
+              <div className="grid gap-2 px-3 py-5 transition-colors duration-200 hover:bg-shrine-maroon-50/60 sm:grid-cols-[9rem_1fr] sm:px-4">
                 <dt className="text-xs font-semibold uppercase tracking-[0.2em] text-shrine-maroon-500">
                   Sunday
                 </dt>
@@ -68,7 +68,7 @@ export function Worship() {
                   </ul>
                 </dd>
               </div>
-              <div className="grid gap-2 py-5 sm:grid-cols-[9rem_1fr]">
+              <div className="grid gap-2 px-3 py-5 transition-colors duration-200 hover:bg-shrine-maroon-50/60 sm:grid-cols-[9rem_1fr] sm:px-4">
                 <dt className="text-xs font-semibold uppercase tracking-[0.2em] text-shrine-maroon-500">
                   2nd collection
                 </dt>
@@ -99,7 +99,7 @@ export function Worship() {
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {devotions.map((item, index) => (
               <Reveal key={item.title} delay={index * 60}>
-                <article className="h-full border border-shrine-stone bg-shrine-cream p-6">
+                <article className="card-lift h-full border border-shrine-stone bg-shrine-cream p-6">
                   <h3 className="font-display text-lg font-semibold text-shrine-maroon-700">
                     {item.title}
                   </h3>

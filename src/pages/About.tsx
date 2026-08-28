@@ -44,7 +44,7 @@ export function About() {
           <div className="mt-14 grid gap-6 lg:grid-cols-3">
             {pillars.map((pillar, index) => (
               <Reveal key={pillar.title} delay={index * 80}>
-                <article className="h-full border border-shrine-stone bg-shrine-parchment p-7">
+                <article className="card-lift h-full border border-shrine-stone bg-shrine-parchment p-7">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-shrine-gold-600">
                     0{index + 1}
                   </p>
@@ -69,7 +69,7 @@ export function About() {
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {priests.map((priest, index) => (
               <Reveal key={priest.name} delay={index * 80}>
-                <article className="border border-shrine-stone bg-shrine-cream p-6">
+                <article className="card-lift border border-shrine-stone bg-shrine-cream p-6">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-shrine-maroon-500">
                     {priest.role}
                   </p>
@@ -118,7 +118,10 @@ export function About() {
                 </thead>
                 <tbody>
                   {ppcMembers.map((member) => (
-                    <tr key={`${member.role}-${member.name}`} className="odd:bg-shrine-cream even:bg-shrine-parchment">
+                    <tr
+                      key={`${member.role}-${member.name}`}
+                      className="odd:bg-shrine-cream even:bg-shrine-parchment transition-colors duration-200 hover:bg-shrine-maroon-50"
+                    >
                       <th scope="row" className="px-4 py-3 font-medium text-shrine-maroon-700">
                         {member.role}
                       </th>
