@@ -40,10 +40,13 @@ test.describe("Ministries — 6 sections", () => {
     await expect(page).toHaveURL(/#\/ministries#liturgical/);
     await expect(page.locator("#liturgical")).toBeVisible();
     await expect(page.getByText(/This path does not lead/i)).not.toBeVisible();
+    await expect(jumpNav.getByRole("link", { name: "Liturgical" })).toHaveAttribute("aria-current", "true");
 
     await jumpNav.getByRole("link", { name: "Faith Formation" }).click();
     await expect(page).toHaveURL(/#\/ministries#faith-formation/);
     await expect(page.locator("#faith-formation")).toBeVisible();
+    await expect(jumpNav.getByRole("link", { name: "Faith Formation" })).toHaveAttribute("aria-current", "true");
+    await expect(jumpNav.getByRole("link", { name: "Liturgical" })).not.toHaveAttribute("aria-current");
   });
 
   test("Home grounds cards link to Worship anchors", async ({ page }) => {

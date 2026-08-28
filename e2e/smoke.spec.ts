@@ -92,4 +92,38 @@ test.describe("smoke — routing & hash anchors", () => {
     await expect(page).toHaveURL(/#\/news-events/);
     await expect(page.getByRole("button", { name: /Open menu/i })).toBeVisible();
   });
+
+  // "Sacred Motion" package (docs/ui-ux-remediation-plan-2026-08-28.md):
+  // staged hero entrance + event chip hierarchy.
+  test("home hero content has staged rise-in entrance classes", async ({ page }) => {
+    await page.goto("/#/");
+    const hero = page.locator("section").first();
+    await expect(hero.locator("h1")).toHaveClass(/rise-in rise-in-d1/);
+    await expect(hero.getByText(/Saint Joseph's Church · Bukit Timah/i)).toHaveClass(/rise-in/);
+    await expect(hero.getByRole("link", { name: "Mass times" })).toBeVisible();
+    // Entrance animations settle at full opacity (fill-mode both).
+    await expect.poll(async () =>
+      hero.locator("h1").evaluate((el) => getComputedStyle(el).opacity),
+    ).toBe("1");
+  });
+
+  test("event cards render gold category chips", async ({ page }) => {
+    await page.goto("/#/news-events");
+    const chips = page.locator("article p", { hasText: /^Parish$|^Devotion$|^Formation$|^Archdiocese$/ });
+    await expect(chips.first()).toBeVisible();
+    await expect(chips.first()).toHaveClass(/border-shrine-gold-500\/50/);
+  });
+
+  test("back-to-top appears after scrolling and returns to the top", async ({ page }) => {
+    await page.goto("/#/");
+    const backToTop = page.getByRole("button", { name: /back to top/i });
+    await expect(backToTop).toBeHidden();
+
+    await page.mouse.wheel(0, 1200);
+    await expect(backToTop).toBeVisible();
+
+    await backToTop.click();
+    await expect.poll(async () => page.evaluate(() => window.scrollY)).toBeLessThan(50);
+    await expect(backToTop).toBeHidden();
+  });
 });

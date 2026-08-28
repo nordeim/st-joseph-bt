@@ -32,9 +32,16 @@ test.describe("Give + FAQ + Worship journeys", () => {
     await expect(firstQuestion).toHaveAttribute("aria-expanded", "true");
     await expect(secondQuestion).toHaveAttribute("aria-expanded", "false");
 
+    // Animated collapse: open panel visible, closed panel collapsed to zero height.
+    const panels = page.getByRole("region", { includeHidden: true });
+    await expect(panels.nth(0)).toBeVisible();
+    await expect(panels.nth(1)).toBeHidden();
+
     await secondQuestion.click();
     await expect(secondQuestion).toHaveAttribute("aria-expanded", "true");
     await expect(firstQuestion).toHaveAttribute("aria-expanded", "false");
+    await expect(panels.nth(1)).toBeVisible();
+    await expect(panels.nth(0)).toBeHidden();
   });
 
   test("Worship Find Us and maps", async ({ page }) => {

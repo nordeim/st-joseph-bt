@@ -84,4 +84,17 @@ test.describe("navigation — desktop, keyboard, skip, footer", () => {
     await expect(page).toHaveURL(/#\/give/);
     await expect(page.getByRole("heading", { name: /^Give$/i }).first()).toBeVisible();
   });
+
+  test("active top-level nav link carries aria-current=page", async ({ page }) => {
+    await page.goto("/#/serve");
+    const nav = page.getByRole("navigation", { name: "Primary" });
+    await expect(nav.getByRole("link", { name: "Serve" })).toHaveAttribute("aria-current", "page");
+    await expect(nav.getByRole("link", { name: "News & Events" })).not.toHaveAttribute("aria-current");
+  });
+
+  test("dropdown parent is aria-current when a child route is active", async ({ page }) => {
+    await page.goto("/#/history");
+    const aboutTrigger = page.getByRole("button", { name: "About" });
+    await expect(aboutTrigger).toHaveAttribute("aria-current", "true");
+  });
 });
