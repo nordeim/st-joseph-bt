@@ -117,7 +117,12 @@ export function Header() {
 
               {item.children && openDesktopMenu === item.label ? (
                 <div className="absolute left-0 top-full z-50 min-w-[17.5rem] pt-2">
-                  <ul className="border border-shrine-stone bg-shrine-cream py-2 shadow-shrine-lg">
+                  <ul
+                    className="border border-shrine-stone bg-shrine-cream py-2 shadow-shrine-lg"
+                    onClickCapture={() =>
+                      setOpenDesktopMenu(null)
+                    }
+                  >
                     {item.children.map((child) => (
                       <li key={child.to}>
                         <Link
@@ -165,7 +170,18 @@ export function Header() {
           id={menuId}
           className="fixed inset-x-0 bottom-0 top-[4.25rem] overflow-y-auto bg-shrine-maroon-950 lg:hidden"
         >
-          <nav aria-label="Mobile" className="px-5 py-6">
+          <nav
+            aria-label="Mobile"
+            className="px-5 py-6"
+            onClickCapture={(event) => {
+              // A link to the CURRENT route never changes pathname, so the
+              // pathname effect below cannot close the drawer — close it on
+              // link activation itself. Section toggle buttons are unaffected.
+              if ((event.target as HTMLElement).closest("a")) {
+                setMobileOpen(false);
+              }
+            }}
+          >
             <ul className="space-y-1">
               {primaryNav.map((item) => (
                 <li key={item.label} className="border-b border-shrine-cream/10">

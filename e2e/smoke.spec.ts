@@ -68,4 +68,28 @@ test.describe("smoke — routing & hash anchors", () => {
     await expect(page).toHaveURL(/#\/serve/);
     await expect(page.getByRole("button", { name: /Open menu/i })).toBeVisible();
   });
+
+  // Regression: a link to the CURRENT route never changes pathname, so the
+  // pathname effect cannot close the drawer. The drawer must close on link
+  // activation itself (found via live-site E2E on 2026-08-28 — see
+  // docs/code-review-audit-2026-08-28.md H-1).
+  test("mobile drawer closes when tapping a link to the current route", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/#/");
+
+    await page.getByRole("button", { name: "Open menu" }).click();
+    const drawer = page.getByRole("navigation", { name: "Mobile" });
+    await expect(drawer).toBeVisible();
+
+    // Tap "Home" while already on / — the drawer must close.
+    await drawer.getByRole("link", { name: "Home" }).click();
+    await expect(page.getByRole("button", { name: "Open menu" })).toBeVisible();
+    await expect(drawer).toHaveCount(0);
+
+    // Different route still navigates and closes the drawer.
+    await page.getByRole("button", { name: "Open menu" }).click();
+    await page.getByRole("navigation", { name: "Mobile" }).getByRole("link", { name: "News & Events" }).click();
+    await expect(page).toHaveURL(/#\/news-events/);
+    await expect(page.getByRole("button", { name: /Open menu/i })).toBeVisible();
+  });
 });
