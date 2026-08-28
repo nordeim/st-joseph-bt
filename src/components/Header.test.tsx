@@ -52,4 +52,24 @@ describe("Header", () => {
     await user.keyboard("{Escape}");
     expect(screen.queryByRole("navigation", { name: "Mobile" })).not.toBeInTheDocument();
   });
+
+  it("marks the active top-level link with aria-current=page", () => {
+    renderHeader("/news-events");
+    const link = screen.getByRole("link", { name: "News & Events" });
+    expect(link).toHaveAttribute("aria-current", "page");
+  });
+
+  it("marks a dropdown parent as current when a child route is active", () => {
+    renderHeader("/history");
+    const aboutTrigger = screen.getByRole("button", { name: /About/i });
+    expect(aboutTrigger).toHaveAttribute("aria-current", "true");
+    expect(aboutTrigger.className).toMatch(/text-shrine-gold-300/);
+  });
+
+  it("hamburger toggle meets the 44px minimum touch target", () => {
+    renderHeader();
+    const toggle = screen.getByRole("button", { name: "Open menu" });
+    expect(toggle.className).toMatch(/h-11/);
+    expect(toggle.className).toMatch(/w-11/);
+  });
 });

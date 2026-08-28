@@ -72,8 +72,20 @@ export function Accordion({ items }: AccordionProps) {
                 />
               </button>
             </h3>
-            <div id={panelId} role="region" aria-labelledby={buttonId} hidden={!isOpen}>
-              <p className="pb-5 leading-relaxed text-shrine-charcoal/80">{item.answer}</p>
+            <div
+              id={panelId}
+              role="region"
+              aria-labelledby={buttonId}
+              aria-hidden={!isOpen}
+              inert={!isOpen}
+              className={cn(
+                "grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none",
+                isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+              )}
+            >
+              <div className="overflow-hidden">
+                <p className="pb-5 leading-relaxed text-shrine-charcoal/80">{item.answer}</p>
+              </div>
             </div>
           </div>
         );

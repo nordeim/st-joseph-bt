@@ -51,4 +51,11 @@ describe("Button", () => {
     render(<Button icon={<span data-testid="icon">★</span>}>WithIcon</Button>);
     expect(screen.getByTestId("icon")).toBeInTheDocument();
   });
+
+  it("gives press feedback via active-state classes", () => {
+    renderWithRouter(<Button to="/">Press</Button>);
+    const link = screen.getByRole("link", { name: "Press" });
+    expect(link.className).toMatch(/active:translate-y-0/);
+    expect(link.className).toMatch(/active:scale/);
+  });
 });

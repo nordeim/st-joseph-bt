@@ -41,16 +41,20 @@ export function PageHero({
       <div className="absolute inset-0 bg-gradient-to-r from-shrine-maroon-950/80 to-transparent" />
       <div className="bg-grain pointer-events-none absolute inset-0" />
       <Container className="relative">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-shrine-gold-300">
+        <p className="rise-in text-xs font-semibold uppercase tracking-[0.3em] text-shrine-gold-300">
           {eyebrow}
         </p>
-        <h1 className="mt-4 max-w-3xl text-balance font-display text-4xl font-semibold text-shrine-cream sm:text-5xl lg:text-6xl">
+        <h1 className="rise-in rise-in-d1 mt-4 max-w-3xl text-balance font-display text-4xl font-semibold text-shrine-cream sm:text-5xl lg:text-6xl">
           {title}
         </h1>
         {description ? (
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-shrine-cream/75">{description}</p>
+          <p className="rise-in rise-in-d2 mt-5 max-w-2xl text-lg leading-relaxed text-shrine-cream/75">
+            {description}
+          </p>
         ) : null}
-        {children ? <div className="mt-8">{children}</div> : null}
+        {children ? (
+          <div className="rise-in rise-in-d3 mt-8">{children}</div>
+        ) : null}
       </Container>
     </section>
   );

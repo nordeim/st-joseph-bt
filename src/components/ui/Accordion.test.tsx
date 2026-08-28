@@ -57,4 +57,28 @@ describe("Accordion", () => {
     await user.keyboard("{End}");
     expect(btn3).toHaveFocus();
   });
+
+  it("open panel is exposed and closed panel is inert for the collapse animation", () => {
+    render(<Accordion items={items} />);
+    const panels = screen.getAllByRole("region", { hidden: true });
+    expect(panels).toHaveLength(3);
+    const open = panels[0] as HTMLElement;
+    const closed = panels[1] as HTMLElement;
+    expect(open).toHaveAttribute("aria-hidden", "false");
+    expect(open).not.toHaveAttribute("inert");
+    expect(closed).toHaveAttribute("aria-hidden", "true");
+    expect(closed).toHaveAttribute("inert");
+  });
+
+  it("collapse animation state follows the open item", async () => {
+    const user = userEvent.setup();
+    render(<Accordion items={items} />);
+    const btn2 = screen.getByRole("button", { name: /Q2/ });
+    await user.click(btn2);
+    const panels = screen.getAllByRole("region", { hidden: true });
+    expect(panels[1]).toHaveAttribute("aria-hidden", "false");
+    expect(panels[1]).not.toHaveAttribute("inert");
+    expect(panels[0]).toHaveAttribute("aria-hidden", "true");
+    expect(panels[0]).toHaveAttribute("inert");
+  });
 });

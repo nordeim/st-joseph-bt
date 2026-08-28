@@ -9,7 +9,7 @@ import { useScrolled } from "@/hooks/useScrolled";
 import { cn } from "@/utils/cn";
 
 export function Header() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   const scrolled = useScrolled(16);
   const isHome = pathname === "/";
   const solid = scrolled || !isHome;
@@ -58,7 +58,7 @@ export function Header() {
           </p>
           <Link
             to="/give"
-            className="font-semibold text-shrine-gold-300 transition-colors hover:text-shrine-gold-100"
+            className="link-underline font-semibold text-shrine-gold-300 transition-colors hover:text-shrine-gold-100"
           >
             Give to the parish
           </Link>
@@ -79,7 +79,10 @@ export function Header() {
         </Link>
 
         <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
-          {primaryNav.map((item) => (
+          {primaryNav.map((item) => {
+            const childActive =
+              item.children?.some((child) => child.to.split("#")[0] === pathname) ?? false;
+            return (
             <div
               key={item.label}
               className="relative"
@@ -98,7 +101,11 @@ export function Header() {
                   type="button"
                   aria-expanded={openDesktopMenu === item.label}
                   aria-haspopup="true"
-                  className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium tracking-wide text-shrine-cream/85 transition-colors hover:text-shrine-gold-300"
+                  aria-current={childActive ? "true" : undefined}
+                  className={cn(
+                    "inline-flex items-center gap-1 px-3 py-2 text-sm font-medium tracking-wide transition-colors hover:text-shrine-gold-300",
+                    childActive ? "text-shrine-gold-300" : "text-shrine-cream/85",
+                  )}
                 >
                   {item.label}
                   <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
@@ -106,6 +113,7 @@ export function Header() {
               ) : (
                 <Link
                   to={item.to}
+                  aria-current={pathname === item.to ? "page" : undefined}
                   className={cn(
                     "inline-flex px-3 py-2 text-sm font-medium tracking-wide transition-colors hover:text-shrine-gold-300",
                     pathname === item.to ? "text-shrine-gold-300" : "text-shrine-cream/85",
@@ -118,7 +126,7 @@ export function Header() {
               {item.children && openDesktopMenu === item.label ? (
                 <div className="absolute left-0 top-full z-50 min-w-[17.5rem] pt-2">
                   <ul
-                    className="border border-shrine-stone bg-shrine-cream py-2 shadow-shrine-lg"
+                    className="menu-in border border-shrine-stone bg-shrine-cream py-2 shadow-shrine-lg"
                     onClickCapture={() =>
                       setOpenDesktopMenu(null)
                     }
@@ -127,6 +135,7 @@ export function Header() {
                       <li key={child.to}>
                         <Link
                           to={child.to}
+                          aria-current={pathname + hash === child.to ? "page" : undefined}
                           className="block px-4 py-2.5 transition-colors hover:bg-shrine-maroon-50"
                         >
                           <span className="block font-display text-sm font-semibold text-shrine-maroon-700">
@@ -144,7 +153,8 @@ export function Header() {
                 </div>
               ) : null}
             </div>
-          ))}
+            );
+          })}
           <Link
             to="/give"
             className="ml-3 rounded-sm bg-shrine-gold-500 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-shrine-maroon-900 transition-colors hover:bg-shrine-gold-300"
@@ -155,7 +165,7 @@ export function Header() {
 
         <button
           type="button"
-          className="inline-flex h-10 w-10 items-center justify-center text-shrine-cream lg:hidden"
+          className="inline-flex h-11 w-11 items-center justify-center text-shrine-cream lg:hidden"
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileOpen}
           aria-controls={menuId}
@@ -168,7 +178,7 @@ export function Header() {
       {mobileOpen ? (
         <div
           id={menuId}
-          className="fixed inset-x-0 bottom-0 top-[4.25rem] overflow-y-auto bg-shrine-maroon-950 lg:hidden"
+          className="drawer-in fixed inset-x-0 bottom-0 top-[4.25rem] overflow-y-auto bg-shrine-maroon-950 lg:hidden"
         >
           <nav
             aria-label="Mobile"
