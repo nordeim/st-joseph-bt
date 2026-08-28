@@ -159,10 +159,10 @@ No backend, no DB, no `.env` contract yet. If env vars are added, document them 
 | `pnpm typecheck` / `npm run typecheck` | Type gate `tsc --noEmit` | ✅ | **Run before every push.** Strict flags will fail on unused locals/params. |
 | `pnpm lint` / `npm run lint` | ESLint flat `eslint . --max-warnings 0` (`eslint.config.js`) | ✅ | Ignores `dist`, `node_modules`, `coverage`, `playwright-report`, `test-results`, `skills`, `src.orig` |
 | `pnpm lint:fix` / `npm run lint:fix` | ESLint auto-fix (`eslint . --fix`) | ✅ | |
-| `pnpm test` / `npm run test` | Vitest `jsdom` — `vitest run` | ✅ | **9 files / 53 tests** — `utils/cn` 5 + `data/nav` 7 + `data/content` 10 + `data/site` 6 + `ui/Button` 8 + `SkipLink` 3 + `ui/Accordion` 4 + `SafeImage` 6 + `Header` 4 via `src/test/setup.ts` |
-| `pnpm test:watch` | Vitest watch mode (`vitest`) | ✅ | Watches 9 files |
+| `pnpm test` / `npm run test` | Vitest `jsdom` — `vitest run` | ✅ | **11 files / 67 tests** — `utils/cn` 5 + `data/nav` 7 + `data/content` 10 + `data/site` 6 + `ui/Button` 9 + `SkipLink` 3 + `ui/Accordion` 6 + `SafeImage` 6 + `Header` 7 + `BackToTop` 5 + `pages/Ministries` 3 via `src/test/setup.ts` |
+| `pnpm test:watch` | Vitest watch mode (`vitest`) | ✅ | Watches 11 files |
 | `pnpm test:coverage` | Vitest with coverage (`vitest run --coverage`) | ✅ | Coverage via `@vitest/coverage-v8` |
-| `pnpm test:e2e` / `npm run test:e2e` | Playwright `chromium` — `playwright test` (22 tests: smoke 8 + navigation 6 + ministries 4 + give-faq 4 in `e2e/`) | ✅ | Green — Bukit Timah routes (`/worship`/`/ministries`/`/serve`/`/give` + `#mass`/`#liturgical` etc.) + drawer same-route close regression |
+| `pnpm test:e2e` / `npm run test:e2e` | Playwright `chromium` — `playwright test` (27 tests: smoke 11 + navigation 8 + ministries 4 + give-faq 4 in `e2e/`) | ✅ | Green — Bukit Timah routes (`/worship`/`/ministries`/`/serve`/`/give` + `#mass`/`#liturgical` etc.) + drawer same-route close regression + rise-in entrance + event chips + back-to-top + aria-current nav |
 | `pnpm test:e2e:ui` | Playwright UI mode (`playwright test --ui`) | ✅ | |
 | `pnpm test:e2e:report` | Open last Playwright HTML report (`playwright show-report`) | ✅ | |
 | `pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build` | **Pre-push gate — all five must be green** | ✅ | Mirrored in CI (`.github/workflows/ci.yml`): lint → typecheck → test → test:e2e → build + artifacts |
@@ -181,11 +181,11 @@ pnpm add -D @playwright/test && npx playwright install chromium
 
 ## Testing Strategy
 
-Current status: **wired — 9 unit files / 53 tests + 22 E2E, all green.** `vitest 3.2.6` (jsdom) + `@testing-library/react 16.2.0` + `jsdom 26.1.0` + `src/test/setup.ts` (`@testing-library/jest-dom/vitest` + `IntersectionObserver` mock + `window.scrollTo` stub) + `playwright 1.55.1` (chromium, `playwright.config.ts` + `e2e/` 4 specs, `expect.timeout` 15s). Run `pnpm test` (unit), `pnpm test:watch` (watch), `pnpm test:coverage` (coverage), `pnpm test:e2e` (E2E, `webServer` → `pnpm exec vite --port 5173 --host 127.0.0.1 --strictPort` with `reuseExistingServer: !CI`), `pnpm test:e2e:ui` (UI mode), `pnpm test:e2e:report` (HTML report). `vitest` config lives in `vite.config.ts` `test` — `{ globals: true, environment: "jsdom", setupFiles: ["src/test/setup.ts"], include: ["src/**/*.{test,spec}.{ts,tsx}"], exclude: ["e2e/**", "node_modules/**", "playwright-report/**", "test-results/**"] }` + `server.watch.ignored` for `skills`/`dist`/`coverage`/`src.orig`.
+Current status: **wired — 11 unit files / 67 tests + 27 E2E, all green.** `vitest 3.2.6` (jsdom) + `@testing-library/react 16.2.0` + `jsdom 26.1.0` + `src/test/setup.ts` (`@testing-library/jest-dom/vitest` + `IntersectionObserver` mock + `window.scrollTo` stub + `matchMedia` stub) + `playwright 1.55.1` (chromium, `playwright.config.ts` + `e2e/` 4 specs, `expect.timeout` 15s). Run `pnpm test` (unit), `pnpm test:watch` (watch), `pnpm test:coverage` (coverage), `pnpm test:e2e` (E2E, `webServer` → `pnpm exec vite --port 5173 --host 127.0.0.1 --strictPort` with `reuseExistingServer: !CI`), `pnpm test:e2e:ui` (UI mode), `pnpm test:e2e:report` (HTML report). `vitest` config lives in `vite.config.ts` `test` — `{ globals: true, environment: "jsdom", setupFiles: ["src/test/setup.ts"], include: ["src/**/*.{test,spec}.{ts,tsx}"], exclude: ["e2e/**", "node_modules/**", "playwright-report/**", "test-results/**"] }` + `server.watch.ignored` for `skills`/`dist`/`coverage`/`src.orig`.
 
-Coverage — **unit (9 files / 53):** `utils/cn` (5), `data/nav` (7), `data/content` (10: lifeTimeline 8, grounds 3, ministries 6, faqs 6, upcomingEvents 6, givingOptions 8, priests 3, ppcMembers 16, images 11, etc.), `data/site` (6), `ui/Button` (8), `SkipLink` (3), `ui/Accordion` (4), `SafeImage` (6), `Header` (4 — drawer close on same-route/different-route link activation, Escape, aria-expanded).
+Coverage — **unit (11 files / 67):** `utils/cn` (5), `data/nav` (7), `data/content` (10: lifeTimeline 8, grounds 3, ministries 6, faqs 6, upcomingEvents 6, givingOptions 8, priests 3, ppcMembers 16, images 11, etc.), `data/site` (6), `ui/Button` (9 — 8 variant/render + active press feedback), `SkipLink` (3), `ui/Accordion` (6 — single-open + arrow/Home/End focus + inert/aria-hidden animation states), `SafeImage` (6), `Header` (7 — drawer close on same-route/different-route link activation, Escape, aria-expanded, aria-current link + parent, 44px hamburger), `BackToTop` (5 — hidden/visible/hide-on-top/click smooth/reduced-motion auto), `pages/Ministries` (3 — 6 pills, hash-matched aria-current, no hash no current).
 
-**E2E (4 files / 22, chromium):** `e2e/smoke.spec.ts` (8 — hero + Worship/Ministries aliases + hash anchors + NotFound + mobile drawer + drawer same-route close regression), `e2e/navigation.spec.ts` (6 — Worship/Ministries hover dropdowns + keyboard + SkipLink hash-preserving + footer 10 links + NotFound + Give), `e2e/ministries.spec.ts` (4 — 6 sections + imageAlt/details, CDN fallback `route.abort`, jump nav `Link` preserves HashRouter, Home grounds → Worship anchors), `e2e/give-faq.spec.ts` (4 — Give 8 SG options + alias `/donate` + FAQ accordion + Worship Find Us + maps).
+**E2E (4 files / 27, chromium):** `e2e/smoke.spec.ts` (11 — hero + staged rise-in entrance + Worship/Ministries aliases + hash anchors + NotFound + mobile drawer + drawer same-route close regression + event category chips + back-to-top scroll journey), `e2e/navigation.spec.ts` (8 — Worship/Ministries hover dropdowns + keyboard + SkipLink hash-preserving + footer 10 links + NotFound + Give + aria-current page link + aria-current dropdown parent), `e2e/ministries.spec.ts` (4 — 6 sections + imageAlt/details, CDN fallback `route.abort`, jump nav `Link` preserves HashRouter + aria-current pills, Home grounds → Worship anchors), `e2e/give-faq.spec.ts` (4 — Give 8 SG options + alias `/donate` + FAQ accordion with animated panel visibility + Worship Find Us + maps).
 
 Conventions: `*.test.tsx` adjacent to source, `__mocks__` only when isolating `react-router-dom`, and `src/data/content.ts` factories for fixtures. `vite.config.ts` `test.exclude` keeps `e2e/**` out of unit runs; `e2e/*.spec.ts` is Playwright only.
 
@@ -207,8 +207,8 @@ Gate for pre-ship (5-step):
 ```bash
 pnpm lint               # eslint flat — no warnings
 pnpm typecheck          # tsc --noEmit
-pnpm test               # vitest jsdom — 9 files / 53 tests
-pnpm test:e2e           # playwright chromium — 22 tests (4 specs)
+pnpm test               # vitest jsdom — 11 files / 67 tests
+pnpm test:e2e           # playwright chromium — 27 tests (4 specs)
 pnpm build              # vite build — singlefile inlines correctly
 ```
 
@@ -272,19 +272,20 @@ Primary artifact `dist/index.html` (+ `dist/images/` copied from `public/` — `
 ### Architecture
 
 ```
-src/ (42 files — 32 source + 9 tests + 1 setup)
+src/ (45 files — 33 source + 11 tests + 1 setup)
   App.tsx                # HashRouter + route table: 17 Route entries (16 content paths + * NotFound), 5 alias groups / 7 alias paths + 9 hash anchors (Layout outlet)
   main.tsx               # StrictMode + createRoot
-  index.css              # Tailwind v4 @theme (24 colors + 2 shadows) + @layer base/utilities (12 utilities: text-balance, bg-adobe-texture, bg-grain, divider-weave, divider-weave-thin, gold-rule, gold-rule-left, hero-ken-burns, mask-fade-b, reveal, reveal-visible, skip-link + 2 keyframes gold-rule-draw/hero-ken-burns)
+  index.css              # Tailwind v4 @theme (24 colors + 2 shadows) + @layer base/utilities (22 utilities: text-balance, bg-adobe-texture, bg-grain, divider-weave, divider-weave-thin, gold-rule, gold-rule-left, hero-ken-burns, mask-fade-b, reveal, reveal-visible, rise-in + rise-in-d1..d4, menu-in, drawer-in, dot-pulse, card-lift, link-underline, skip-link + 6 keyframes gold-rule-draw/hero-ken-burns/rise-in/menu-in/drawer-in/halo-pulse)
   components/
-    Layout.tsx           # Outlet + double-hash scroll/hash restoration (split on # + strip / + 80ms setTimeout + fallback window.scrollTo + SkipLink + Header + Footer)
-    Header.tsx           # fixed + useScrolled(16) (hook default 12) → maroon-950/92 translucent + blur; transparent at top of Home + top bar (lg: site.address·feast + Give) + desktop hover (openDesktopMenu, closes on child-link click) + mobile drill-down whose drawer closes on any in-drawer link activation (onClickCapture — same-route taps never change pathname) + hash-aware close + Escape handler
+    Layout.tsx           # Outlet + double-hash scroll/hash restoration (split on # + strip / + 80ms setTimeout + fallback window.scrollTo + SkipLink + Header + Footer + BackToTop)
+    Header.tsx           # fixed + useScrolled(16) (hook default 12) → maroon-950/92 translucent + blur; transparent at top of Home + top bar (lg: site.address·feast + Give link-underline) + desktop hover (openDesktopMenu, menu-in entrance, closes on child-link click, aria-current parent/link states) + mobile drill-down (drawer-in entrance) whose drawer closes on any in-drawer link activation (onClickCapture — same-route taps never change pathname) + hash-aware close + Escape handler + h-11 w-11 (44px) hamburger
     Footer.tsx           # 4-col (parish blurb + Explore/Get involved from footerNav + visit/contact) + divider-weave-thin + Singapore copy (St Joseph the Worker, Cashew MRT, Rosary Garden, 最); consumes site.ts + nav.ts
-    PageHero.tsx         # maroon-950 hero + SafeImage (opacity-35, fetchPriority="high") + dual gradients + bg-grain + eyebrow/title/description + children slot; props: eyebrow/title/description/image/fallback/compact? (compact tightens pt/pb)
+    PageHero.tsx         # maroon-950 hero + SafeImage (opacity-35, fetchPriority="high") + dual gradients + bg-grain + rise-in staged eyebrow/title/description/children; props: eyebrow/title/description/image/fallback/compact? (compact tightens pt/pb)
     SafeImage.tsx        # <img> wrapper: fallback="/images/hero-church.jpg", loading="lazy" default, state for current/loaded, fade-in, onError→dataset.fallback guard (once), optional fetchPriority ("high" on above-the-fold heroes), transition-opacity
     SkipLink.tsx         # preventDefault + imperative focus on #main-content (never rewrites hash under HashRouter)
-    Emblem.tsx / Timeline.tsx (left rail, now 1845–2017) / SocialIcons.tsx
-    ui/                  # Button (discriminated to/href/button + primary/secondary/ghost/outline-light + icon) / Container (max-w-7xl px-5 sm:px-8) / SectionHeading (eyebrow/title/description + align/light + gold-rule) / Accordion (single-open, aria-expanded, keyboard Arrow/Home/End) / Reveal (delay/as + IntersectionObserver 0.15 + prefers-reduced-motion)
+    BackToTop.tsx        # fixed bottom-right (44px target, maroon-900 + gold ring): appears when scrollY > 480, aria-hidden + tabIndex -1 + pointer-events-none when hidden, click → window.scrollTo (behavior auto under prefers-reduced-motion via matchMedia; never touches the hash)
+    Emblem.tsx / Timeline.tsx (left rail, now 1845–2017, dot-pulse halos) / SocialIcons.tsx
+    ui/                  # Button (discriminated to/href/button + primary/secondary/ghost/outline-light + icon + active press feedback) / Container (max-w-7xl px-5 sm:px-8) / SectionHeading (eyebrow/title/description + align/light + gold-rule) / Accordion (single-open, aria-expanded, keyboard Arrow/Home/End, animated grid-rows collapse with inert closed panels) / Reveal (delay/as + IntersectionObserver 0.15 + prefers-reduced-motion)
   hooks/
     useScrolled.ts       # threshold 12 default; Header passes 16 — intentional mismatch (delayed transparent→solid on Home)
   pages/ (10, named exports)
@@ -301,8 +302,8 @@ src/ (42 files — 32 source + 9 tests + 1 setup)
   utils/
     cn.ts                # twMerge(clsx) — always merge via cn()
   test/
-    setup.ts             # vitest jsdom setup (jest-dom + IntersectionObserver mock + scrollTo/scrollIntoView stubs)
-  **/*.test.{ts,tsx}     # 9 files / 53 tests: utils/cn (5), data/nav (7), data/content (10), data/site (6), ui/Button (8), SkipLink (3), ui/Accordion (4), SafeImage (6), Header (4)
+    setup.ts             # vitest jsdom setup (jest-dom + IntersectionObserver mock + scrollTo/scrollIntoView stubs + matchMedia stub)
+  **/*.test.{ts,tsx}     # 11 files / 67 tests: utils/cn (5), data/nav (7), data/content (10), data/site (6), ui/Button (9), SkipLink (3), ui/Accordion (6), SafeImage (6), Header (7), BackToTop (5), pages/Ministries (3)
 public/
   images/ (8)            # hero-church.jpg, chapel-interior.jpg, sanctuary.jpg, rosary-garden.jpg, stained-glass.jpg, parish-hall.jpg, cemetery.jpg, feast.jpg (Vite publicDir → dist/images/ — upload alongside dist/index.html); Wikimedia hero + 2 Pexels CDN images with SafeImage local fallback (allowlist: upload.wikimedia.org, images.pexels.com)
 vite.config.ts           # alias @→src + test { globals, jsdom, setupFiles: src/test/setup.ts, include: src/**/*.{test,spec}.{ts,tsx}, exclude: e2e/** } + server.watch.ignored [skills/**, dist/**, playwright-report/**, test-results/**, coverage/**, src.orig/**] + viteSingleFile()
@@ -310,7 +311,7 @@ tsconfig.json            # strict + noUnusedLocals/noUnusedParameters/noFallthro
 eslint.config.js         # flat config (typescript-eslint 8 + react-hooks 5 + react-refresh); ignores [dist, node_modules, coverage, playwright-report, test-results, skills, src.orig]
 playwright.config.ts     # Playwright 1.55.1 (chromium, webServer → pnpm exec vite :5173, expect timeout 15s; CSP is a meta tag in index.html, not a config header)
 index.html               # Google Fonts Fraunces + Source Sans 3; CSP allows images from Wikimedia+Pexels and frames from google.com; OG for St Joseph's Bukit Timah; base description + viewport; #root + /src/main.tsx
-e2e/ (4 specs / 22 tests) # smoke (8) + navigation (6) + ministries (4) + give-faq (4) + helpers.ts
+e2e/ (4 specs / 27 tests) # smoke (11) + navigation (8) + ministries (4) + give-faq (4) + helpers.ts
 .github/workflows/ci.yml # CI: lint → typecheck → test → test:e2e (chromium) → build + artifacts (Node 24, pnpm 11, pnpm-lock committed, --frozen-lockfile)
 src.orig/                # NOT present in this repository (never committed) — Rother lineage lives in docs/porting.md; eslint/vite-watch ignore entries are inert defensive guards
 ```
@@ -327,7 +328,7 @@ src.orig/                # NOT present in this repository (never committed) — 
 - Data/utils: `camelCase.ts` (`content.ts`, `site.ts`, `nav.ts`, `cn.ts`).
 - Pages: `PascalCase.tsx` matching route intent (`About.tsx`, `History.tsx`, `Worship.tsx`, `Ministries.tsx`, `NewsEvents.tsx`, `Serve.tsx`, `Give.tsx`, `FAQ.tsx`, `NotFound.tsx`) — 10 pages, all named exports (`Home`, `About`, `History`, `Worship`, `Ministries`, `NewsEvents`, `Serve`, `Give`, `FAQ`, `NotFound`).
 - Assets: `public/images/<slug>.jpg` (8 files) — reference as `/images/<slug>.jpg` (absolute from root, Vite `publicDir` → `dist/images/` — upload alongside `dist/index.html`; singlefile inlines JS+CSS, not `public/`). Local keys: `heroFallback`/`chapel`/`sanctuary`/`garden`/`glass`/`hall`/`cemetery`/`feast`; CDN keys: `hero` (Wikimedia), `naveCdn`/`courtyardCdn` (Pexels) — `*Fallback` local via `SafeImage` `fallback` prop.
-- Tests: `*.test.{ts,tsx}` adjacent to source — **9 files / 53 tests**: `src/utils/cn.test.ts` (5), `src/data/nav.test.ts` (7), `src/data/content.test.ts` (10), `src/data/site.test.ts` (6), `src/components/ui/Button.test.tsx` (8), `src/components/SkipLink.test.tsx` (3), `src/components/ui/Accordion.test.tsx` (4), `src/components/SafeImage.test.tsx` (6), `src/components/Header.test.tsx` (4) + `src/test/setup.ts` (jest-dom + IntersectionObserver mock). `vite.config.ts` `test.exclude` keeps `e2e/**` out of unit runs; `e2e/*.spec.ts` is Playwright only.
+- Tests: `*.test.{ts,tsx}` adjacent to source — **11 files / 67 tests**: `src/utils/cn.test.ts` (5), `src/data/nav.test.ts` (7), `src/data/content.test.ts` (10), `src/data/site.test.ts` (6), `src/components/ui/Button.test.tsx` (9), `src/components/SkipLink.test.tsx` (3), `src/components/ui/Accordion.test.tsx` (6), `src/components/SafeImage.test.tsx` (6), `src/components/Header.test.tsx` (7), `src/components/BackToTop.test.tsx` (5), `src/pages/Ministries.test.tsx` (3) + `src/test/setup.ts` (jest-dom + IntersectionObserver mock + matchMedia stub). `vite.config.ts` `test.exclude` keeps `e2e/**` out of unit runs; `e2e/*.spec.ts` is Playwright only.
 
 ### Design System
 
@@ -385,7 +386,7 @@ When adding vars, document them here and in `.env.example`, and guard with `impo
 
 You are done when:
 
-- `pnpm lint`, `pnpm typecheck`, `pnpm test` (9 files / 53 tests), `pnpm test:e2e` (22 tests, chromium), and `pnpm build` are all green (75 total — 9 unit files + 4 E2E specs via `lint && typecheck && test && test:e2e && build`).
+- `pnpm lint`, `pnpm typecheck`, `pnpm test` (11 files / 67 tests), `pnpm test:e2e` (27 tests, chromium), and `pnpm build` are all green (94 total — 11 unit files + 4 E2E specs via `lint && typecheck && test && test:e2e && build`).
 - All 10 pages + 7 alias paths in 5 groups (`/worship`↔`/mass-times`↔`/hours-location`↔`/visit`; `/ministries`↔`/ministry`; `/news-events`↔`/news-and-events`; `/serve`↔`/volunteer`; `/give`↔`/donate`) + 9 hash anchors (`#mass`/`#confession`/`#visit` on `/worship` + `#liturgical`/`#faith-formation`/`#pastoral-care`/`#family-life`/`#youth`/`#mandarin` on `/ministries`; plus `/serve` has no anchors) navigate correctly, including direct hash URLs on static hosts (HashRouter, no 404.html needed, `Layout`'s double-hash `resolveAnchor` survives `/#/ministries#liturgical`).
 - Header is fixed, `useScrolled(16)` translucency works (transparent at top of Home → `maroon-950/92` blur on scroll), top bar (`lg`) shows `620 Upper Bukit Timah Road · Feast of St Joseph the Worker · 1 May` + `Give →/give`, mobile drawer closes on navigation (`aria-expanded`), desktop Worship/Ministries dropdowns show children + `description`, and keyboard + `SkipLink` (`#main-content`, hash-preserving, `tabindex="-1"`) covers all nav items.
 - Content renders from `src/data/*` without inline duplication: `content.ts` 8 interfaces (1845–2017 timeline, `grounds` 3, `ministries` 6 with jump nav, `faqs` 6 SG, `upcomingEvents` 6 Parish/Devotion/Formation/Archdiocese with optional `href`, `givingOptions` 8 SG, `priests` 3, `ppcMembers` 16, `serveRoles` 4, `devotions` 6, `images` 11) + `site.ts` hours 5 keys + mass 7 keys + address/CSP/phones/transport/feast/UEN + nav `primaryNav` 6 / `footerNav` 10; new tokens live in `src/index.css` `@theme` (24 colors + 2 shadows).
@@ -425,7 +426,7 @@ You are done when:
 | 2 | Foundational Principles (Six-Phase) | Yes | ✅ |
 | 3 | Implementation Standards (General + TS Strict + Vite 7 + React 19 + Tailwind v4 CSS-first + Components) | Yes | ✅ |
 | 4 | Development Workflow (Env Setup + Build Commands) | Yes | ✅ |
-| 5 | Testing Strategy (wired — 9 unit files / 53 tests + 22 E2E) | Yes | ✅ |
+| 5 | Testing Strategy (wired — 11 unit files / 67 tests + 27 E2E) | Yes | ✅ |
 | 6 | Code Quality Standards (Lint + Type Safety + Styling) | Yes | ✅ |
 | 7 | Git & Version Control (branching + Conventional Commits + CI Node 24/pnpm 11 + HashRouter deploy) | Yes | ✅ |
 | 8 | Error Handling & Debugging (SafeImage / NotFound "does not lead to the church" / Layout scroll) | Yes | ✅ |

@@ -40,8 +40,8 @@ Every row below is implemented — no placeholders. Pages are named exports from
 | Icons | lucide-react | `1.34.0` | Header/footer + page iconography |
 | Utils | clsx + tailwind-merge | `2.1.1` / `3.6.0` | `cn()` class merging — always merge via `cn()` |
 | Bundling | vite-plugin-singlefile | `2.3.3` | Inlines JS+CSS into `dist/index.html` (`public/images/` copied to `dist/images/`) |
-| Testing | Vitest + Testing Library + jsdom | `3.2.6` / `16.2.0` / `26.1.0` | `vitest run` — **9 files / 53 tests** (`src/utils/cn` 5 + `data/nav` 7 + `data/content` 10 + `data/site` 6 + `ui/Button` 8 + `SkipLink` 3 + `ui/Accordion` 4 + `SafeImage` 6 + `Header` 4) via `src/test/setup.ts` |
-| E2E | Playwright | `1.55.1` | `chromium`, `webServer` → `pnpm exec vite --port 5173 --host 127.0.0.1 --strictPort`, `e2e/` — **22 tests** (smoke 8 + navigation 6 + ministries 4 + give-faq 4) |
+| Testing | Vitest + Testing Library + jsdom | `3.2.6` / `16.2.0` / `26.1.0` | `vitest run` — **11 files / 67 tests** (`src/utils/cn` 5 + `data/nav` 7 + `data/content` 10 + `data/site` 6 + `ui/Button` 9 + `SkipLink` 3 + `ui/Accordion` 6 + `SafeImage` 6 + `Header` 7 + `BackToTop` 5 + `pages/Ministries` 3) via `src/test/setup.ts` |
+| E2E | Playwright | `1.55.1` | `chromium`, `webServer` → `pnpm exec vite --port 5173 --host 127.0.0.1 --strictPort`, `e2e/` — **27 tests** (smoke 11 + navigation 8 + ministries 4 + give-faq 4) |
 | Linting | ESLint flat + typescript-eslint + react-hooks | `9.39.5` / `8.28.0` / `5.2.0` | `eslint . --max-warnings 0`, `eslint.config.js` (ignores `dist`, `skills`, `src.orig`) |
 | Fonts | Google Fonts | — | `Fraunces` (display) + `Source Sans 3` (body) via `index.html` |
 
@@ -127,13 +127,13 @@ flowchart TB
 │   ├── 📂 utils/
 │   │   └── 📄 cn.ts         # twMerge(clsx) — always merge via cn()
 │   ├── 📂 test/
-│   │   └── 📄 setup.ts      # vitest jsdom setup (jest-dom + IntersectionObserver mock + scrollTo/scrollIntoView stubs)
-│   └── 📂 **/*.test.{ts,tsx} # 9 files / 53 tests: utils/cn (5), data/nav (7), data/content (10), data/site (6), ui/Button (8), SkipLink (3), ui/Accordion (4), SafeImage (6), Header (4)
-├── 📂 e2e/                  # 22 tests (Playwright chromium)
-│   ├── 📄 smoke.spec.ts     # 8 smoke (hero + Worship/Ministries aliases + hash anchors + NotFound + mobile drawer + drawer same-route close regression)
-│   ├── 📄 navigation.spec.ts# 6 desktop Worship/Ministries dropdown + keyboard + SkipLink + footer 10 links + Give
-│   ├── 📄 ministries.spec.ts# 4 sections (6 ids) + imageAlt + fallback + jump nav + Home grounds → Worship anchors
-│   ├── 📄 give-faq.spec.ts  # 4 Give 8 options + FAQ accordion + Worship Find Us + maps + Footer Give
+│   │   └── 📄 setup.ts      # vitest jsdom setup (jest-dom + IntersectionObserver mock + scrollTo/scrollIntoView stubs + matchMedia stub)
+│   └── 📂 **/*.test.{ts,tsx} # 11 files / 67 tests: utils/cn (5), data/nav (7), data/content (10), data/site (6), ui/Button (9), SkipLink (3), ui/Accordion (6), SafeImage (6), Header (7), BackToTop (5), pages/Ministries (3)
+├── 📂 e2e/                  # 27 tests (Playwright chromium)
+│   ├── 📄 smoke.spec.ts     # 11 smoke (hero + rise-in entrance + Worship/Ministries aliases + hash anchors + NotFound + mobile drawer + drawer same-route close regression + event chips + back-to-top)
+│   ├── 📄 navigation.spec.ts# 8 desktop Worship/Ministries dropdown + keyboard + SkipLink + footer 10 links + Give + aria-current nav states
+│   ├── 📄 ministries.spec.ts# 4 sections (6 ids) + imageAlt + fallback + jump nav (aria-current pills) + Home grounds → Worship anchors
+│   ├── 📄 give-faq.spec.ts  # 4 Give 8 options + FAQ accordion (animated panel visibility) + Worship Find Us + maps + Footer Give
 │   └── 📄 helpers.ts        # gotoHash + expectHash helpers
 ├── 📄 .github/workflows/ci.yml # CI: lint → typecheck → test → test:e2e (chromium) → build (Node 24, pnpm 11)
 ├── 📂 docs/
@@ -181,8 +181,8 @@ pnpm preview
 ```bash
 pnpm lint               # eslint flat — expect no output (clean)
 pnpm typecheck         # tsc --noEmit — expect no output (clean)
-pnpm test               # vitest jsdom — expect 9 files / 53 passed (cn 5 + nav 7 + content 10 + site 6 + Button 8 + SkipLink 3 + Accordion 4 + SafeImage 6 + Header 4)
-pnpm test:e2e           # Playwright chromium — expect 22 passed (smoke 8 + navigation 6 + ministries 4 + give-faq 4)
+pnpm test               # vitest jsdom — expect 11 files / 67 passed (cn 5 + nav 7 + content 10 + site 6 + Button 9 + SkipLink 3 + Accordion 6 + SafeImage 6 + Header 7 + BackToTop 5 + Ministries 3)
+pnpm test:e2e           # Playwright chromium — expect 27 passed (smoke 11 + navigation 8 + ministries 4 + give-faq 4)
 pnpm build              # expect: "✓ built in ~3s" + "Inlining: index-*.js / style-*.css"
 ls -lh dist/index.html  # expect: single HTML file, no separate assets chunk
 ls -lh dist/images/     # expect: 8 images (hero-church + chapel-interior + sanctuary + rosary-garden + stained-glass + parish-hall + cemetery + feast)
@@ -193,8 +193,8 @@ ls -lh dist/images/     # expect: 8 images (hero-church + chapel-interior + sanc
 | `pnpm dev` | Vite ready on `:5173`, HMR active |
 | `pnpm lint` | Exit `0`, no warnings (`--max-warnings 0`) |
 | `pnpm typecheck` | Exit `0`, no errors |
-| `pnpm test` | `9 test files — 53 passed` (cn + nav + content + site + Button + SkipLink + Accordion + SafeImage + Header) |
-| `pnpm test:e2e` | `22 passed` (smoke 8 + navigation 6 + ministries 4 + give-faq 4, chromium) |
+| `pnpm test` | `11 test files — 67 passed` (cn + nav + content + site + Button + SkipLink + Accordion + SafeImage + Header + BackToTop + Ministries) |
+| `pnpm test:e2e` | `27 passed` (smoke 11 + navigation 8 + ministries 4 + give-faq 4, chromium) |
 | `pnpm build` | `dist/index.html` exists + `dist/images/` (8 files) |
 | `pnpm preview` | Prod preview on `:4173`, alias routes (`/mass-times`, `/ministry`, `/donate`, `/volunteer`…) + hash anchors (`#/worship#mass`, `#/ministries#liturgical`) navigate |
 
@@ -227,7 +227,7 @@ Tokens live in `src/index.css` `@theme`. Extend there — never use arbitrary `b
 | `shadow-shrine` | `0 20px 60px -20px rgba(51,16,15,.45)` | Hero, cards, emblem |
 | `shadow-shrine-lg` | `0 40px 90px -30px rgba(51,16,15,.55)` | Elevated cards, header dropdown |
 
-**Typography:** `Fraunces` (display, quote, `font-display` / `h1–h4`) + `Source Sans 3` (body, `font-sans` / `font-body` alias) — loaded in `index.html`, set in `@theme` + `@layer base`. Utilities: `text-balance`, `bg-adobe-texture`, `bg-grain`, `divider-weave` / `divider-weave-thin`, `gold-rule` / `gold-rule-left`, `reveal` / `reveal-visible`, `skip-link`, `mask-fade-b`, `hero-ken-burns` (20s Ken Burns, disabled under `prefers-reduced-motion`).
+**Typography:** `Fraunces` (display, quote, `font-display` / `h1–h4`) + `Source Sans 3` (body, `font-sans` / `font-body` alias) — loaded in `index.html`, set in `@theme` + `@layer base`. Utilities: `text-balance`, `bg-adobe-texture`, `bg-grain`, `divider-weave` / `divider-weave-thin`, `gold-rule` / `gold-rule-left`, `reveal` / `reveal-visible`, `skip-link`, `mask-fade-b`, `hero-ken-burns` (20s Ken Burns), plus the "Sacred Motion" set: `rise-in` (+ `rise-in-d1..d4` stagger delays) for hero/PageHero entrances, `menu-in` / `drawer-in` for dropdown/drawer entrances, `card-lift` (hover lift + shadow + gold border) for every interactive card, `link-underline` (gold underline draws in on hover/focus), `dot-pulse` (timeline halo). All are transform/opacity-only and gated by the global `prefers-reduced-motion` block in `src/index.css` (see `docs/ui-ux-remediation-plan-2026-08-28.md`).
 
 ## Deployment
 
@@ -252,7 +252,7 @@ This repo follows the six-phase workflow in `CLAUDE.md` (ANALYZE → PLAN → VA
 - **Commits:** Conventional Commits — `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `style:` — atomic, subject ≤72 chars.
 - **Branches:** `feat/<slug>`, `fix/<slug>`, `docs/<slug>` — short-lived (1–3 days), squash-merge.
 - **Conventions:** `PascalCase.tsx` for components/pages, `camelCase.ts` for data/utils, `primaryNav` single-source, alias routes preserved, `cn()` for merges, `shrine-*` tokens only.
-- **Pre-push gate:** `pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build` — all five green (9 unit files / 53 tests + 22 E2E + singlefile build) — CI mirrors this in `.github/workflows/ci.yml` (Node 24, pnpm 11).
+- **Pre-push gate:** `pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build` — all five green (11 unit files / 67 tests + 27 E2E + singlefile build) — CI mirrors this in `.github/workflows/ci.yml` (Node 24, pnpm 11).
 
 > `skills/` is vendored, git-tracked reference content (agent skills index: `skills/skills-catalog.md`) — not project source; lint/build tooling ignores it. `src.orig/` is **not part of this repository** (never committed); its ignore entries are inert defensive guards. See `AGENTS.md` for the compact cheat sheet.
 
@@ -266,7 +266,7 @@ This repo follows the six-phase workflow in `CLAUDE.md` (ANALYZE → PLAN → VA
 | Bare `href="#mass"` routes to NotFound | Use `<Link to="/worship#mass">` (or `/ministries#liturgical`) — plain `#id` replaces the `HashRouter` hash and routes to `*`. |
 | `tsc --noEmit` fails on unused var | `noUnusedLocals/Params` is `true` — remove or prefix with `_` only if intentionally unused. |
 | External image not loading | `SafeImage` falls back to `fallback` (default `/images/hero-church.jpg`) via `dataset.fallback` guard; check CDN URL (`upload.wikimedia.org` / `images.pexels.com`) and CSP `img-src` in `index.html`. |
-| `pnpm test` finds 0 tests | Should not happen — `src/test/setup.ts` + `src/**/*.test.*` (9 files) should be present. Re-add `vite.config.ts` `test` block and `tsconfig.json` `types [vitest/globals]`. |
+| `pnpm test` finds 0 tests | Should not happen — `src/test/setup.ts` + `src/**/*.test.*` (11 files) should be present. Re-add `vite.config.ts` `test` block and `tsconfig.json` `types [vitest/globals]`. |
 | `pnpm test:e2e` fails | Check `playwright.config.ts` `baseURL` / `webServer` and stale assertions — specs now target `/worship#mass`, `/ministries#liturgical`, `/history`, `620 Upper Bukit Timah`. Run `pnpm test:e2e:ui` to inspect. |
 
 ## License
