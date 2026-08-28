@@ -30,7 +30,7 @@ All commands verified in `package.json` `scripts`. Don't document a script until
 ## Structure
 
 ```
-src/ (35 files — 26 source + 8 tests + 1 setup)
+src/ (41 files — 32 source + 8 tests + 1 setup)
   App.tsx              # HashRouter + 17 Route entries (16 content paths + * NotFound; see Routing below)
   main.tsx             # StrictMode + createRoot
   index.css            # @theme tokens (24 colors + 2 shadows) + @layer base/utilities (13: text-balance, bg-adobe-texture, bg-grain, divider-weave, divider-weave-thin, gold-rule, gold-rule-left, hero-ken-burns, mask-fade-b, reveal, reveal-visible, skip-link + keyframes gold-rule-draw/hero-ken-burns)

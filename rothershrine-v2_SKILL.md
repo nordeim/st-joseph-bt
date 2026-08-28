@@ -2,8 +2,9 @@
 name: st-joseph-bt
 display_name: St Joseph's Church (Bukit Timah) — Singapore
 version: 1.0.0
-last_updated: 2026-08-27T12:00Z
+last_updated: 2026-08-28T12:00Z
 project_state: static SPA — 8 files / 48 unit tests + 21 E2E green (ported from rothershrine v1.3.0, harness + E2E rewritten for Bukit Timah), lint+typecheck+test+test:e2e+build green, singlefile deploy (pinned exact, pnpm 11)
+verified: pnpm lint 0 + pnpm typecheck 0 + pnpm test 8/48 + pnpm test:e2e 21 + pnpm build 375kB → dist/index.html + dist/images/8
 stack: react 19.2.8 / vite 7.3.6 / tailwind 4.3.3 (@tailwindcss/vite 4.1.17) / typescript 5.9.3 / react-router 7.18.2 / singlefile 2.3.3 / eslint 9.39.5 flat / vitest 3.2.6 jsdom / testing-library 16.2.0 / playwright 1.55.1 chromium (21 E2E green)
 rendering: static SPA (HashRouter, no SSR)
 data_layer: file-backed typed arrays in src/data/* + const site object
@@ -101,13 +102,13 @@ port_provenance: Singapore port of https://stjoseph-bt.org.sg/ — St Joseph's C
 
 **Environment:** No `.env`, no DB, no auth, no docker. `pnpm` is the supported manager (`--frozen-lockfile` in CI). `npm ci` fails on these exact pins (typescript-eslint 8.28.0 peer range predates TS 5.9) — use `npm ci --legacy-peer-deps` if npm is unavoidable. `skills/` is vendored, git-tracked reference content (not project source) — tooling ignores it. `src.orig/` is the frozen Rother original — also ignored (eslint + tsc).
 
-**Test harness — current reality (2026-08-27):**
+**Test harness — current reality (2026-08-28):**
 
 | Suite | Status | Detail |
 |---|---|---|
-| `vitest` unit (`pnpm test`) | **0 tests / 0 files** — hollow but green | `src/test/setup.ts` deleted; `src/` has no `*.test.*`. `pnpm test` exits 0 with "no test files found". `src.orig/` retains the 6-file/29-test reference suite. |
-| `playwright` E2E (`pnpm test:e2e`) | **20 tests stale — will fail** | 4 specs (smoke 7, navigation 5, what-to-see 4, give-faq 4) still assert Rother routes/content (`/about-blessed-stanley-rother`, `/what-to-see`, `/pilgrimage`, `#pilgrim-center`/`#shrine-church`/`#tepeyac-hill`, "shepherd who stayed", "Apla's Circle"). Do not run as a gate until rewritten for Bukit Timah routes. |
-| `lint` / `typecheck` / `build` | Green on fresh clones | `eslint 9.39.5` flat `--max-warnings 0`, `tsc --noEmit` strict, `viteSingleFile` → `dist/index.html` + `dist/images/` |
+| `vitest` unit (`pnpm test`) | **8 files / 48 tests — green** | `src/utils/cn` 5 + `data/nav` 7 + `data/content` 10 + `data/site` 6 + `ui/Button` 8 + `SkipLink` 3 + `ui/Accordion` 4 + `SafeImage` 5 via `src/test/setup.ts` (jest-dom + IntersectionObserver mock + scrollTo stubs). `vite.config.ts test { globals, jsdom, setupFiles, include, exclude }` keeps `e2e/**` out. |
+| `playwright` E2E (`pnpm test:e2e`) | **21 tests — green** | 4 specs `smoke 7 + navigation 6 + ministries 4 + give-faq 4` (chromium) — Bukit Timah routes `/worship`/`/ministries`/`/serve`/`/give` + `#mass`/`#liturgical` etc. + `SafeImage` fallback via `route.abort`. |
+| `lint` / `typecheck` / `build` | Green on fresh clones | `eslint 9.39.5` flat `--max-warnings 0`, `tsc --noEmit` strict, `viteSingleFile` → `dist/index.html` (375 kB, JS+CSS inlined) + `dist/images/` 8 files |
 
 ---
 
@@ -122,30 +123,28 @@ pnpm install --frozen-lockfile  # deterministic — versions pinned exact (pnpm 
 pnpm dev                # → http://localhost:5173 (Vite HMR)
 pnpm lint               # → eslint 9.39.5 flat — must be clean (--max-warnings 0)
 pnpm typecheck          # → tsc --noEmit — must be silent
-pnpm test               # → vitest 3.2.6 jsdom — 0 tests (hollow, exits 0)
+pnpm test               # → vitest 3.2.6 jsdom — 8 files / 48 tests green (cn 5 + nav 7 + content 10 + site 6 + Button 8 + SkipLink 3 + Accordion 4 + SafeImage 5)
 pnpm test:e2e           # → playwright 1.55.1 chromium — 21 tests (smoke 7 + navigation 6 + ministries 4 + give-faq 4) green
 pnpm build              # → dist/index.html + dist/images/ (viteSingleFile 2.3.3 inlines JS+CSS; publicDir copied)
 pnpm preview            # → http://localhost:4173 (preview dist)
 ```
 
-**Pre-push gate — current minimum (until tests are rewritten):**
+**Pre-push gate — all five must be green:**
 
 ```bash
-pnpm lint && pnpm typecheck && pnpm build
-# Full gate (restore before enforcing):
-# pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build
+pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build
 ```
 
 ### 3.2 Critical Config Files
 
 | File | Purpose | Gotcha |
 |---|---|---|
-| `vite.config.ts` | `plugins: [react(), tailwindcss(), viteSingleFile()]` + `resolve.alias["@"]` | **No `test` block** — vitest defaults apply. **No `server.watch.ignored`** — previously ignored `**/skills/**` etc.; re-add if `ENOSPC` returns from vendored `skills/` tree. `@` must stay in sync (`vite.config.ts` ↔ `tsconfig.json` `paths`). |
-| `tsconfig.json` | `ES2020`/`ESNext`/`bundler`/`react-jsx`/`strict`/`noUnused*`/`isolatedModules`/`noEmit` + `include ["src","vite.config.ts"]` + `types ["node"]` + `paths {"@/*":["src/*"]}` + `baseUrl:"."` | Only `src` + `vite.config.ts` are included. `eslint.config.js`/`playwright.config.ts` are **not** included (they are not type-checked). Adding a file outside `src/` requires expanding `include`. |
+| `vite.config.ts` | `plugins: [react(), tailwindcss(), viteSingleFile()]` + `resolve.alias["@"]` + `test { globals, jsdom, setupFiles: src/test/setup.ts, include: src/**/*.{test,spec}.{ts,tsx}, exclude: e2e/** }` + `server.watch.ignored [skills/**, dist/**, playwright-report/**, test-results/**, coverage/**, src.orig/**]` | `test` keeps `e2e/**` out of unit runs; `server.watch.ignored` prevents `ENOSPC` from vendored `skills/` tree (large `.venv`). `@` must stay in sync (`vite.config.ts` ↔ `tsconfig.json` `paths`). |
+| `tsconfig.json` | `ES2020`/`ESNext`/`bundler`/`react-jsx`/`strict`/`noUnused*`/`isolatedModules`/`noEmit` + `include ["src","vite.config.ts","eslint.config.js","playwright.config.ts"]` + `types ["node","vitest/globals"]` + `paths {"@/*":["src/*"]}` + `baseUrl:"."` | `include` covers `src` + all config files (so `eslint.config.js` + `playwright.config.ts` are type-checked). `types [vitest/globals]` required for `describe/it/expect` globals. Adding a file outside `src/` requires expanding `include`. |
 | `eslint.config.js` | flat config (`eslint 9.39.5` + `@eslint/js 9.39.5` + `typescript-eslint 8.28.0` + `react-hooks 5.2.0` + `react-refresh 0.4.19` + `globals 16.1.0`) — ignores `dist/node_modules/coverage/playwright-report/test-results` **and `skills` and `src.orig`** | Flat. `pnpm lint:fix` → `eslint . --fix`. Ignoring `skills` + `src.orig` is what keeps the gate green. Never re-add `src.orig/` to lint/tsc. |
-| `playwright.config.ts` | `playwright 1.55.1` (`@playwright/test 1.55.1` chromium, `webServer` → `pnpm exec vite --port 5173 --host 127.0.0.1 --strictPort`) | `testDir: e2e`, `baseURL: http://localhost:5173`, `reuseExistingServer: !CI`, `expect.timeout: 15s`, `trace/video on failure`. Stale until rewritten (see §2). |
-| `e2e/` | 21 tests — `smoke.spec.ts` (7), `navigation.spec.ts` (6), `ministries.spec.ts` (4), `give-faq.spec.ts` (4) + `helpers.ts` | **green** — Worship/Ministries anchors + aliases |
-| `.github/workflows/ci.yml` | CI: lint → typecheck → test → test:e2e (chromium) → build + artifacts | `pnpm 11`, `node 24`. Will fail on `test:e2e` until specs are rewritten — see §11. |
+| `playwright.config.ts` | `playwright 1.55.1` (`@playwright/test 1.55.1` chromium, `webServer` → `pnpm exec vite --port 5173 --host 127.0.0.1 --strictPort`) | `testDir: e2e`, `baseURL: http://localhost:5173`, `reuseExistingServer: !CI`, `expect.timeout: 15s`, `trace/video on failure`. **Green** — 21 tests: `smoke 7 + navigation 6 + ministries 4 + give-faq 4`. |
+| `e2e/` | 21 tests — `smoke.spec.ts` (7), `navigation.spec.ts` (6), `ministries.spec.ts` (4), `give-faq.spec.ts` (4) + `helpers.ts` | **green** — Worship/Ministries anchors + aliases + `SafeImage` fallback |
+| `.github/workflows/ci.yml` | CI: lint → typecheck → test → test:e2e (chromium) → build + artifacts | `pnpm 11`, `node 24`. All five green — `dist/` + `playwright-report/` artifacts. |
 | `src/index.css` | `@import "tailwindcss"` + `@theme` (24 colors + 2 shadows) + `@layer base/utilities` (13 incl. `hero-ken-burns`, `gold-rule`/`gold-rule-left`, `reveal`/`reveal-visible`, `skip-link`, `mask-fade-b` + keyframes `gold-rule-draw`/`hero-ken-burns`) | Only token source; no `tailwind.config.*` exists. |
 | `index.html` | `lang en`, `viewport`, `meta description`, scoped `Content-Security-Policy` meta + `referrer` meta, data-URI SVG favicon, preconnect `fonts.googleapis.com`, `Fraunces`+`Source Sans 3`, `#root` + `src/main.tsx` | CSP allows inline script/style (singlefile), Google Fonts, `img-src` `upload.wikimedia.org` + `images.pexels.com` + `self`/`data:`/`blob:`, `frame-src https://www.google.com` (maps embed). OG tags for St Joseph's Church (Bukit Timah). |
 | `.gitignore` | Ignores `node_modules/`, `.next/`, `dist/`, `skills/` + `nohup.out`, `.venv`, `bak.git/` | `skills/` ignore is ineffective for tracked files — `skills/` **is** committed (vendored). `src.orig/` is also committed but eslint/tsc ignored. |
@@ -249,10 +248,10 @@ index.html (#root) → src/main.tsx (StrictMode+createRoot + #root guard)
 
 No global store, no API layer, no `server/` — add only with an ADR.
 
-### 5.2 Directory Inventory (32 files in `src/` — 31 ts/tsx + 1 css; no tests, no setup)
+### 5.2 Directory Inventory (41 files in `src/` — 32 source + 8 tests + 1 setup)
 
 ```
-src/ (32 files)
+src/ (41 files — 32 source + 8 tests + 1 setup)
   App.tsx                 # HashRouter + 17 Route entries (16 content paths + * NotFound; 5 alias groups, 7 alias paths)
   main.tsx                # StrictMode + createRoot + explicit #root guard
   index.css               # @theme (24 colors + 2 shadows) + @layer base/utilities (13 + 2 keyframes)
@@ -281,10 +280,12 @@ src/ (32 files)
     site.ts               # site as const — name/shortName/chineseName/tagline/vision + address + hours(5) + mass(7) + contact + transport + feast + uen/chequePayee/facebook/archdiocese/mapsUrl/mapsEmbedSrc — single source
   utils/
     cn.ts                 # twMerge(clsx) + cn helper
-  # no src/test — removed pending rewrite; src.orig/test is reference only (6 files / 29 tests)
+  test/
+    setup.ts              # vitest jsdom setup (jest-dom + IntersectionObserver mock + scrollTo/scrollIntoView stubs)
+  **/*.test.{ts,tsx}      # 8 files / 48 tests: utils/cn (5), data/nav (7), data/content (10), data/site (6), ui/Button (8), SkipLink (3), ui/Accordion (4), SafeImage (5)
 ```
 
-**Counts:** `find src -type f | wc -l` → 35; `public/images/` → 8 files (`hero-church.jpg`, `chapel-interior.jpg`, `sanctuary.jpg`, `rosary-garden.jpg`, `stained-glass.jpg`, `parish-hall.jpg`, `cemetery.jpg`, `feast.jpg`) → `dist/images/` on build (not inlined). src/test/setup.ts + 8 `*.test.*` under src/.
+**Counts:** `find src -type f | wc -l` → 41; `public/images/` → 8 files (`hero-church.jpg`, `chapel-interior.jpg`, `sanctuary.jpg`, `rosary-garden.jpg`, `stained-glass.jpg`, `parish-hall.jpg`, `cemetery.jpg`, `feast.jpg`) → `dist/images/` on build (not inlined). src/test/setup.ts + 8 `*.test.*` under src/.
 
 ### 5.3 Client vs Server
 
@@ -509,7 +510,7 @@ Verify new pairings with a contrast checker before merging.
 - **Focus ring:** `focus-visible:outline` via Tailwind defaults; `src/index.css` `@layer base` sets `outline: 2px solid --color-shrine-gold-500` + `offset 3px` for `:focus-visible`. Preserve on `Button` and `Header` toggle. Do not remove outlines.
 - **Header toggle:** `aria-label` toggles `Open menu`/`Close menu`, `aria-expanded` reflects `mobileOpen`. Keep both.
 - **Dropdowns:** Hover-open (`onMouseEnter`/`onMouseLeave` on `primaryNav` children). If converting to click-open, add `aria-haspopup="true"` + focus-trap + `Escape` close.
-- **Skip-to-content:** Implemented — `SkipLink.tsx` renders `<a href="#main-content">` first in `Layout`. Under HashRouter the component **must not** let the browser follow the href (the hash is the route): `onClick` `preventDefault`s and imperatively focuses `#main-content` (`<main id="main-content">` in `Layout`). Contract previously enforced by `SkipLink.test.tsx` (now in `src.orig/` only); rewrite that test when restoring unit tests. Also covered (stale) in `e2e/navigation.spec.ts`.
+- **Skip-to-content:** Implemented — `SkipLink.tsx` renders `<a href="#main-content">` first in `Layout`. Under HashRouter the component **must not** let the browser follow the href (the hash is the route): `onClick` `preventDefault`s and imperatively focuses `#main-content` (`<main id="main-content">` in `Layout`). Covered by `src/components/SkipLink.test.tsx` (3 tests) + `e2e/navigation.spec.ts` (SkipLink hash-preserving).
 - **Landmarks:** `header`/`main`/`footer` present via `Layout`; every page's `PageHero` is `section` with heading hierarchy `h1 → h2`. Each ministry section in `Ministries.tsx` has `aria-labelledby` pointing to its `h2`.
 
 ### 8.3 Images & Media
@@ -546,7 +547,7 @@ Each entry: symptom → root cause → fix → lesson. Severity: `Critical` (bre
 | 4 | **Arbitrary hex color** (High) | Token drift, contrast regression | Used `bg-[#691f1e]` instead of `bg-shrine-maroon-600` | Use `shrine-*` token from `@theme` | Only `@theme` is the palette |
 | 5 | **`@` alias desync** (High) | `Cannot find module '@/...'` | Changed `vite.config.ts` alias without `tsconfig.json` `paths` (or vice versa) | Update both files; restart dev server | Alias is a two-file contract |
 | 6 | **Bypassing `cn()`** (High) | Duplicated/conflicting Tailwind classes not deduped | Used `` `px-3 ${cond? "px-6":""}` `` | Always `cn("px-3", cond && "px-6")` | `twMerge` is the only path |
-| 7 | **Stale `include`** (High) | File not type-checked | Added file outside `src/` but didn't expand `tsconfig.json` `include` | Add path to `include` (currently `["src","vite.config.ts"]`) | `include` is the type boundary |
+| 7 | **Stale `include`** (High) | File not type-checked | Added file outside `src/` but didn't expand `tsconfig.json` `include` | Add path to `include` (currently `["src","vite.config.ts","eslint.config.js","playwright.config.ts"]`) | `include` is the type boundary |
 | 8 | **`noUnusedLocals` breach** (Medium) | `tsc --noEmit` fails on unused import/var | Left placeholder imports/params after refactor | Remove or prefix deliberately unused param with `_` (`_idx`) | Strict flags are the gate |
 | 9 | **Runtime font loader** (Medium) | FOIT + duplicate load | Imported fonts in JS instead of `index.html` | Fonts belong in `index.html` + `@theme`; no JS loader | One font source of truth |
 | 10 | **Missing `imageAlt`** (Medium) | Empty alt on content image | Added `GroundsPlace`/`Ministry` without `imageAlt` | `imageAlt` is required — fill it | Content interface enforces a11y (§20) |
@@ -563,8 +564,8 @@ Each entry: symptom → root cause → fix → lesson. Severity: `Critical` (bre
 | `pnpm dev` → `EADDRINUSE :5173` | Port in use | `pnpm dev -- --port 5174` or `lsof -i:5173` then kill |
 | `Cannot find module '@/utils/cn'` | Alias desync (see §9 #5) | Align `vite.config.ts` ↔ `tsconfig.json` `paths @/*` (`baseUrl:"."`) — change both; restart Vite |
 | `npx tsc --noEmit` → `TS6133 'x' is declared but never used` | `noUnusedLocals`/`Params` (`strict` + `noUnusedLocals:true` `noUnusedParameters:true`) | Remove import or use it; for intentionally unused param, prefix `_` (e.g., `_idx`) |
-| `pnpm test` → "no test files found" | Expected — `src/` has 0 tests (hollow harness) | Don't add `--passWithNoTests` workarounds; rewrite tests when ready (template in `src.orig/test/`) |
-| `pnpm test:e2e` → failures on `#pilgrim-center`, `/what-to-see`, `Apla's Circle` | Stale Rother-era `e2e/` (see §2) — not a regression | Rewrite `e2e/what-to-see.spec.ts` → `e2e/ministries.spec.ts` etc. for `/worship`/`/ministries` + new anchors; don't run as gate until then |
+| `pnpm test` → "no test files found" | `src/test/setup.ts` missing or `vite.config.ts test.include` misconfigured | Verify `src/test/setup.ts` exists and `vite.config.ts test` includes `src/**/*.{test,spec}.{ts,tsx}` with `exclude: ["e2e/**"]` — should be 8 files / 48 tests |
+| `pnpm test:e2e` → failures on `#mass`/`#liturgical` etc. | Missing `id` or `Layout` double-hash logic stale | Verify `Worship.tsx` has `id="mass"`/`"confession"`/`"visit"` and `Ministries.tsx` has 6 ministry `id`s; `Layout` `resolveAnchor` must handle `/#/worship#mass` form |
 | Hash anchor lands at top (`/#/worship#mass` or `/#/ministries#liturgical`) | Target `id` missing or `Layout` effect stale | Verify `id="mass"` in `Worship.tsx` and `id="liturgical"` in `Ministries.tsx`; check `Layout` `useEffect` deps `[pathname, hash]`; jump nav must be `<Link to="/ministries#id">` (not plain `<a href="#id">`, see §9 #11) |
 | Double-hash `#/ministries#liturgical` doesn't scroll | `Layout` `resolveAnchor` not matching `pathname` | Verify `resolveAnchor` splits `window.location.hash` on `#`, filters, strips leading `/`, and compares against `pathname.replace(/^\//,"")` — the `cleaned === pathname…` guard prevents false anchors |
 | `pnpm build` → `dist/index.html` missing or not inlined | `viteSingleFile` misordered or removed | Verify `plugins: [react(), tailwindcss(), viteSingleFile()]` order; check `dist/index.html` exists and `Inlining: index-*.js` in log; `dist/images/` alongside is expected (publicDir copy) |
@@ -572,9 +573,9 @@ Each entry: symptom → root cause → fix → lesson. Severity: `Critical` (bre
 | Fonts not loading | `index.html` preconnect or href typo | Verify `fonts.googleapis.com` preconnect + `Fraunces`/`Source Sans 3` href intact; no JS font loader |
 | GH Pages deep-link 404 on refresh | Switched to `BrowserRouter` | Revert to `HashRouter` or add `404.html` SPA redirect |
 | Image 404 (`/images/hero-church.jpg`) or Wikimedia/Pexels CDN fails | Wrong public path / missing `dist/images/` on deploy / CDN blocked / old shrine fallback | Hero/fallback belong in `public/images/` and referenced as `/images/…` (absolute from root; Vite copies to `dist/images/` — upload alongside `index.html`); CDN URLs (`images.hero` Wikimedia + `naveCdn`/`courtyardCdn` Pexels in `content.ts`) must use `SafeImage` (`fallback` default `/images/hero-church.jpg` + `dataset.fallback` guard + `loading="lazy"` default) — don't use bare `<img>` for CDN sources. Upload count: **8 files** in `public/images/` |
-| `tests` not found or `e2e` leaking into vitest | `test.include`/`exclude` misconfigured | Currently `vite.config.ts` has no `test` block — vitest defaults (`**/*.{test,spec}.*`) apply; `src/` has no tests so nothing runs. If restoring tests, re-add `test: { globals, jsdom, setupFiles: ["src/test/setup.ts"], include: ["src/**/*.{test,spec}.{ts,tsx}"], exclude: ["e2e/**", …] }` |
-| `vite.config.ts` `server.watch` `ENOSPC` on `pnpm dev` | Vendored `skills/` tree (large `.venv`) watched without ignore | Re-add `server.watch.ignored: ["**/skills/**","**/dist/**","**/playwright-report/**","**/test-results/**","**/coverage/**"]` |
-| `tsconfig.json` errors on `eslint.config.js` or `playwright.config.ts` | Added those files to `include` without installing their types | Current `include` is `["src","vite.config.ts"]` only (intentional). If expanding, add `eslint.config.js`/`playwright.config.ts` deliberately and adjust `types`. |
+| `tests` not found or `e2e` leaking into vitest | `test.include`/`exclude` misconfigured | Verify `vite.config.ts test: { globals:true, environment:"jsdom", setupFiles:["src/test/setup.ts"], include:["src/**/*.{test,spec}.{ts,tsx}"], exclude:["e2e/**","node_modules/**","playwright-report/**","test-results/**"] }` — `e2e/**` must be excluded |
+| `vite.config.ts` `server.watch` `ENOSPC` on `pnpm dev` | Vendored `skills/` tree (large `.venv`) watched without ignore | Verify `server.watch.ignored: ["**/skills/**","**/dist/**","**/playwright-report/**","**/test-results/**","**/coverage/**","**/src.orig/**"]` is present in `vite.config.ts` |
+| `tsconfig.json` errors on `eslint.config.js` or `playwright.config.ts` | Added those files to `include` without installing their types | `include` is `["src","vite.config.ts","eslint.config.js","playwright.config.ts"]` with `types ["node","vitest/globals"]` — required for `describe/it/expect` globals. |
 
 **Live-site verification (post-deploy — Bukit Timah routes):**
 
@@ -600,7 +601,7 @@ Run in order — every step must be green before pushing `main` (`main` is the d
 ```bash
 pnpm lint                      # 1 — eslint 9.39.5 flat --max-warnings 0
 pnpm typecheck                 # 2 — tsc --noEmit (strict + noUnusedLocals/Params + noFallthroughCasesInSwitch)
-pnpm test                      # 3 — vitest 3.2.6 jsdom — 0 tests (hollow, exits 0) — skip as gate until rewritten
+pnpm test                      # 3 — vitest 3.2.6 jsdom — 8 files / 48 tests green (cn 5 + nav 7 + content 10 + site 6 + Button 8 + SkipLink 3 + Accordion 4 + SafeImage 5)
 pnpm test:e2e                  # 4 — playwright 1.55.1 chromium — 21 tests green (smoke 7 + navigation 6 + ministries 4 + give-faq 4)
 pnpm build                     # 5 — singlefile 2.3.3 build → dist/index.html (JS+CSS inlined) + dist/images/ (8 files, copied not inlined)
 pnpm preview &                 # 6 — smoke: spot-check 10 routes + 7 alias paths + 9 hash anchors (3 on /worship + 6 on /ministries)
@@ -612,9 +613,9 @@ git push origin main           # 9 — deploy (GH Pages / S3 upload of dist/inde
 | Category | Check | How |
 |---|---|---|
 | Lint | `pnpm lint` clean | `eslint 9.39.5` flat `eslint . --max-warnings 0` (`typescript-eslint 8.28.0` + `react-hooks 5.2.0`) — ignores `skills` + `src.orig` |
-| Types | `pnpm typecheck` (`npx tsc --noEmit`) clean | `strict` + `noUnusedLocals`/`noUnusedParameters`/`noFallthroughCasesInSwitch`/`isolatedModules`/`noEmit` pass; `tsconfig.json` `include` covers `src` + `vite.config.ts` only |
-| Tests | `pnpm test` — 0 passed (0 files) | Hollow — `src/test/` deleted, `vitest` defaults apply, exits 0. Re-add `src/test/setup.ts` + `test.include/exclude` when restoring. Reference: `src.orig/test/` (6 files/29 tests). |
-| E2E | `pnpm test:e2e` — 20 stale (4 specs) | **Do not gate on this until rewritten.** Stale specs: `smoke.spec.ts` (7), `navigation.spec.ts` (5), `what-to-see.spec.ts` (4), `give-faq.spec.ts` (4) — all assert Rother routes/hashes/content. Rewrite to cover `/worship`/`/ministries`/`/serve`/`/give` + Bukit Timah copy before re-enabling `pnpm test:e2e` in CI. `playwright.config.ts` `expect.timeout: 15s` + `webServer` → `pnpm exec vite` still applies. |
+| Types | `pnpm typecheck` (`npx tsc --noEmit`) clean | `strict` + `noUnusedLocals`/`noUnusedParameters`/`noFallthroughCasesInSwitch`/`isolatedModules`/`noEmit` pass; `tsconfig.json` `include` covers `src` + `vite.config.ts` + `eslint.config.js` + `playwright.config.ts` with `types [node, vitest/globals]` |
+| Tests | `pnpm test` — 8 files / 48 tests green | `vitest 3.2.6 jsdom` via `src/test/setup.ts` (jest-dom + IntersectionObserver mock) + `vite.config.ts test.include [src/**/*.{test,spec}.{ts,tsx}]` — `e2e/**` excluded |
+| E2E | `pnpm test:e2e` — 21 tests green (4 specs) | `smoke 7 + navigation 6 + ministries 4 + give-faq 4` — Bukit Timah aliases + hash anchors + SafeImage fallback + mobile drawer. `playwright.config.ts` `expect.timeout: 15s` + `webServer → pnpm exec vite :5173` |
 | Build | `pnpm build` greens | `viteSingleFile 2.3.3` inlines JS + CSS; `dist/images/` 8 files copied (not inlined) — verify one-file `dist/index.html` |
 | Routes | All 10 pages + 7 alias paths + 9 hash anchors navigate (HashRouter) | Manual or `agent-browser` smoke (`Layout` double-hash aware `#/ministries#id` → split + 80ms `scrollIntoView`) |
 | A11y | Contrast ≥4.5:1 on body, `alt` on content images (`SafeImage` fallback), `aria-expanded` on toggle, `SkipLink` hash discipline, `aria-label="Jump to ministry"` | Spot-check per §8 table + `axe-core` on Header/Home hero/FAQ/Worship map |
@@ -623,16 +624,11 @@ git push origin main           # 9 — deploy (GH Pages / S3 upload of dist/inde
 | CSP | No console CSP violations | Verify `index.html` CSP: `img-src` includes `upload.wikimedia.org` + `images.pexels.com`, `frame-src` includes `google.com` for maps embed; no `unsafe-eval` |
 | Git | No `dist/`/`node_modules/` committed | `.gitignore` respected (`skills/` + `src.orig/` stay tracked as vendored/frozen reference but ignored by tooling) |
 
-**Current minimum gate (until E2E + unit tests are rewritten):**
-
-```bash
-pnpm lint && pnpm typecheck && pnpm build
-```
-
-Restore the full gate once tests are green:
+**Pre-push gate — all five must be green (verified 2026-08-28):**
 
 ```bash
 pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build
+# → lint 0 + typecheck 0 + test 8/48 + test:e2e 21 + build 375kB dist/index.html + dist/images/8
 ```
 
 ---
@@ -650,8 +646,8 @@ pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build
 | L7 | **Content shape = UI shape** | Orig `WhatToSeeSection.imageAlt` was optional in a draft; a11y regression followed. Port `GroundsPlace`/`Ministry` keep `imageAlt` + `imageFallback` required for the same reason. | Required in §20 interfaces; future entries must include both. |
 | L8 | **Hash is the route — `<Link>` not `<a>`** | Ministries jump nav drafted with `<a href="#liturgical">` — would have replaced the HashRouter hash and routed to NotFound. | Fixed to `<Link to="/ministries#id">` in `Ministries.tsx` + Worship children; documented §5.4 / §9 #11. |
 | L9 | **`SafeImage` default drift** | Wikimedia hero (`images.hero`) introduced a new CDN host; old default `/images/hero-shrine.jpg` would have 404'd on fallback. | Updated `SafeImage.tsx` default to `/images/hero-church.jpg`; added `images.heroFallback` + `imageFallback` on every `grounds`/`ministries` entry; CSP extended to `upload.wikimedia.org`. |
-| L10 | **Stale `e2e/` is a trap** | Port kept the 20-test E2E suite verbatim — it asserts `#pilgrim-center`/`#shrine-church`/`#tepeyac-hill` and `/about-blessed-stanley-rother` that no longer exist; CI would fail on the next push. | Marked stale in §2/§11, excluded from the current gate, and documented as rewrite target (`what-to-see.spec.ts` → `ministries.spec.ts`, `pilgrimage` → `worship`). Don't re-enable `test:e2e` in `.github/workflows/ci.yml` until green. |
-| L11 | **`vite.config.ts` has no `test` block — don't assume it does** | Port removed the `test { globals, jsdom, setupFiles, include, exclude }` block when deleting `src/test/`; a naïve "restore `src/test/setup.ts`" without restoring the `test` block would leave vitest misconfigured. | When restoring unit tests, re-add the `test` block + `setupFiles: ["src/test/setup.ts"]` + `include`/`exclude`; and expand `tsconfig.json` `include` + `types` accordingly. See §3.2. |
+| L10 | **Stale `e2e/` was a trap — now resolved** | Port initially kept the 20-test Rother E2E verbatim (`#pilgrim-center` etc.); CI would have failed. | Rewritten to Bukit Timah: `smoke 7 + navigation 6 + ministries 4 + give-faq 4` = 21 green (2026-08-28). Alias is `what-to-see` → `ministries`, `pilgrimage` → `worship` — now covered. |
+| L11 | **`vite.config.ts` `test` block is required** | Restoring `src/test/setup.ts` without the `test` block leaves vitest misconfigured. | `vite.config.ts` now has `test { globals:true, jsdom, setupFiles:["src/test/setup.ts"], include:["src/**/*.{test,spec}.{ts,tsx}"], exclude:["e2e/**"] }` + `types ["vitest/globals"]` — keep both in sync (see §3.2). |
 | L12 | **Canonical flip: `/about` not `/about-blessed-stanley-rother`** | Port flipped the About canonical (orig: `/about-blessed-stanley-rother` canonical, `/about` alias). Any hard-coded deep link to the old canonical would 404 if the alias were dropped. | Kept only `/about` (no alias needed — the old canonical is intentionally retired for the parish). Document the flip in §5.4 + Appendix D; if old shrine links must survive, add `/about-blessed-stanley-rother` as an alias back to `/about`. |
 
 ---
@@ -668,7 +664,7 @@ pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build
 - Don't use `any` — use `unknown` + narrowing; `as any` is a last resort with `// ponytail: ceiling…` comment.
 - Don't use `type` for object shapes — prefer `interface` (`type` is for unions).
 - Don't relax `strict` flags to silence errors — fix the code. `noUnusedLocals`/`noUnusedParameters`/`noFallthroughCasesInSwitch`/`isolatedModules`/`noEmit` are the gate.
-- Don't assume `tsconfig.json` includes `eslint.config.js`/`playwright.config.ts` — it doesn't (only `src` + `vite.config.ts`). Don't re-add `src.orig/` to `include`.
+- Don't assume `tsconfig.json` scope — it includes `["src","vite.config.ts","eslint.config.js","playwright.config.ts"]` with `types ["node","vitest/globals"]`. Don't re-add `src.orig/` to `include`.
 
 **Styling**
 - Don't introduce `amber-400`/`slate-*`/`zinc-*` — forbidden; use `shrine-*`.
@@ -1223,7 +1219,7 @@ This project follows **ANALYZE → PLAN → VALIDATE → IMPLEMENT → VERIFY �
 1. **ANALYZE** — Mine explicit, implicit, and ambiguous requirements; explore 2–3 approaches with trade-offs.
 2. **PLAN** — Sequenced phases with checklists + success criteria; present for approval.
 3. **VALIDATE** — Obtain explicit go-ahead before coding.
-4. **IMPLEMENT** — Library-first, modular, TDD Red→Green→Refactor (one cycle per commit) where tests exist; where harness is hollow, gate on `lint && typecheck && build` + manual smoke.
+4. **IMPLEMENT** — Library-first, modular, TDD Red→Green→Refactor (one cycle per commit) — harness is **green (8 files/48 + 21 E2E)**; gate on `lint && typecheck && test && test:e2e && build` + manual smoke.
 5. **VERIFY** — `pnpm lint` + `pnpm typecheck` + `pnpm build` (+ `pnpm test`/`pnpm test:e2e` once rewritten) + a11y/perf review + edge cases.
 6. **DELIVER** — Usage instructions + runbook + follow-up recommendations.
 

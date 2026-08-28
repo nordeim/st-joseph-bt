@@ -1,6 +1,6 @@
 # St Joseph's Church (Bukit Timah)
 
-![version 1.3.0](https://img.shields.io/badge/version-1.3.0-33100f)
+![version 1.0.0](https://img.shields.io/badge/version-1.0.0-33100f)
 ![React](https://img.shields.io/badge/React-19.2.8-61DAFB?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-7.3.6-646CFF?logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3.3-06B6D4?logo=tailwindcss&logoColor=white)

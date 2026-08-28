@@ -272,7 +272,7 @@ Primary artifact `dist/index.html` (+ `dist/images/` copied from `public/` — `
 ### Architecture
 
 ```
-src/ (35 files — 26 source + 8 tests + 1 setup)
+src/ (41 files — 32 source + 8 tests + 1 setup)
   App.tsx                # HashRouter + route table: 17 Route entries (16 content paths + * NotFound), 5 alias groups / 7 alias paths + 9 hash anchors (Layout outlet)
   main.tsx               # StrictMode + createRoot
   index.css              # Tailwind v4 @theme (24 colors + 2 shadows) + @layer base/utilities (13: text-balance, bg-adobe-texture, bg-grain, divider-weave, divider-weave-thin, gold-rule, gold-rule-left, hero-ken-burns, mask-fade-b, reveal, reveal-visible, skip-link + keyframes gold-rule-draw/hero-ken-burns)
@@ -311,8 +311,8 @@ eslint.config.js         # flat config (typescript-eslint 8 + react-hooks 5 + re
 playwright.config.ts     # Playwright 1.55.1 (chromium, webServer → pnpm exec vite :5173, expect timeout 15s, header handles wikimedia/pexels CSP)
 index.html               # Google Fonts Fraunces + Source Sans 3; CSP allows images from Wikimedia+Pexels and frames from google.com; OG for St Joseph's Bukit Timah; base description + viewport; #root + /src/main.tsx
 e2e/ (4 specs / 21 tests) # smoke (7) + navigation (6) + ministries (4) + give-faq (4) + helpers.ts
-.github/workflows/ci.yml # CI: lint → typecheck → test (currently empty) → test:e2e (chromium, will fail until rewritten) → build + artifacts (Node 24, pnpm 11, pnpm-lock committed, --frozen-lockfile)
-src.orig/                # frozen reference snapshot of the Rother Shrine original — not imported by the app; eslint ignored, tsc excluded; retains 6 unit tests / 29 cases and 20 E2E as rewrite template
+.github/workflows/ci.yml # CI: lint → typecheck → test → test:e2e (chromium) → build + artifacts (Node 24, pnpm 11, pnpm-lock committed, --frozen-lockfile)
+src.orig/                # frozen reference snapshot of the Rother Shrine original — not imported by the app; eslint ignored, tsc excluded; retains 6 unit tests / 29 cases and 20 E2E as rewrite template (Bukit Timah port is 8/48 + 21 green)
 ```
 
 - **SafeImage fallback pattern:** `SafeImage.tsx` guards `onError` with `dataset.fallback="1"` so the swap to local `/images/hero-church.jpg` (or explicit `fallback`) fires once, with `opacity` fade-in via `loaded` state. Use `SafeImage` for every external image; never bare `<img>` for CDN sources. CDN allowlist is exactly `upload.wikimedia.org` (hero) + `images.pexels.com` (naveCdn, courtyardCdn) — 3 URLs on 2 hosts.

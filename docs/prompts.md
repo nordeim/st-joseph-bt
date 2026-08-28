@@ -5,6 +5,8 @@ Next, convert the plan into a detailed ToDo list before meticulously executing t
 
 ---
 
+please meticulously review @AGENTS.md , @CLAUDE.md , @README.md and @rothershrine-v2_SKILL.md to have a deep understanding of the project and its codebase design and architecture. Next, meticulously plan to validate your deep understanding against the codebase to check for alignment and to confirm the project status.
+
 please meticulously review @AGENTS.md , @CLAUDE.md , @README.md and @rothershrine_SKILL.md to have a deep understanding of the project and its codebase design and architecture. Next, meticulously plan to validate your deep understanding against the codebase to check for alignment and to confirm the project status.
 
 please meticulouly plan to perform a code review and audit on the current codebase using your available and relevant skills
