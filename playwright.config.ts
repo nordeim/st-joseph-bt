@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Playwright E2E for rothershrine — HashRouter SPA.
+ * Playwright E2E for st-joseph-bt — HashRouter SPA.
  * Chromium-only in v1 (fast). Add firefox/webkit later.
  * webServer reuses existing dev server if running; otherwise starts `pnpm dev`.
  */
