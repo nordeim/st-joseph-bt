@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  @page { size: 794px 1123px; margin: 0; }
+  :root {
+    /* Cascade palette (design_engine.py palette-cascade, seed 42) */
+    --c-bg: #f5f5f4;
+    --c-accent: #92761f;
+    --c-text: #151513;
+    --c-muted: #7e7c74;
+    --c-mid: #4e4732;
+    --c-surface: #ebeae8;
+  }
+  html, body {
+    margin: 0; padding: 0;
+    width: 794px; height: 1123px;
+    background: var(--c-bg);
+    color: var(--c-text);
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  }
+  @media screen {
+    html { height: auto; display: flex; justify-content: center; min-height: 100vh; background: var(--c-bg); }
+    body { transform-origin: top center; scale: min(1, calc(100vw / 794), calc(100vh / 1123)); margin: 0 auto; box-shadow: 0 0 60px rgba(0,0,0,0.12); }
+  }
+  .cover { width: 794px; height: 1123px; position: relative; border: none; outline: none; box-shadow: none; }
+
+  /* Layer 1 - background grid, 2% opacity, clipped */
+  .layer-bg {
+    position: absolute; inset: 0; overflow: hidden; z-index: 1;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(78,71,50,0.05) 0 0.5px, transparent 0.5px 66px),
+      repeating-linear-gradient(90deg, rgba(78,71,50,0.05) 0 0.5px, transparent 0.5px 66px);
+  }
+
+  /* Layer 2 - structure: ultra-thick vertical anchor line at 0.12W */
+  .layer-structure { position: absolute; inset: 0; z-index: 2; }
+  .anchor-line {
+    position: absolute;
+    left: 95px; top: 112px; bottom: 112px;
+    width: 8px;
+    background: var(--c-accent);
+  }
+
+  /* Layer 3 - content. Flat px anchors (S3.9). */
+  .layer-content { position: absolute; inset: 0; z-index: 3; }
+  .kicker {
+    position: absolute; left: 185px; top: 168px;
+    font-size: 16pt; font-weight: 400;
+    letter-spacing: 4px; text-transform: uppercase;
+    color: var(--c-text); opacity: 0.6;
+  }
+  .hero {
+    position: absolute; left: 185px; top: 300px;
+    font-family: 'Playfair Display', 'Times New Roman', serif;
+    font-size: 42pt; font-weight: 900;
+    line-height: 1.15;
+    color: var(--c-text);
+    max-width: 560px;
+  }
+  .hero .accent-word { color: var(--c-accent); }
+  .summary {
+    position: absolute; left: 185px; top: 588px;
+    font-size: 16pt; font-weight: 400; line-height: 1.6;
+    color: var(--c-text); opacity: 0.85;
+    max-width: 476px;
+  }
+  .meta {
+    position: absolute; left: 185px; top: 852px;
+    font-size: 17pt; font-weight: 500; line-height: 1.55;
+    color: var(--c-mid);
+  }
+  .meta .sub { font-size: 13pt; font-weight: 400; color: var(--c-muted); }
+  .footer {
+    position: absolute; left: 185px; bottom: 64px;
+    font-size: 11pt; font-weight: 400;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--c-text); opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+  <div class="cover">
+    <div class="layer-bg"></div>
+    <div class="layer-structure">
+      <div class="anchor-line"></div>
+    </div>
+    <div class="layer-content">
+      <div class="kicker">Comparative Design Audit</div>
+      <div class="hero">Two Websites,<br>One Sacred<br>Design Language</div>
+      <div class="summary">
+        A visual aesthetic and UI/UX comparison of rothershrine.jesspete.shop and
+        st-joseph.jesspete.shop - two parish sites built on one shared token system -
+        evaluated from full codebase review and live browser evidence, with
+        severity-classified findings and WCAG contrast verification.
+      </div>
+      <div class="meta">
+        Rother Shrine &middot; St Joseph's Church Bukit Timah<br>
+        <span class="sub">Design Audit &middot; 29 August 2026</span>
+      </div>
+      <div class="footer">Evidence-Backed &middot; Confidence-Labeled &middot; Z.ai</div>
+    </div>
+  </div>
+</body>
+</html>
