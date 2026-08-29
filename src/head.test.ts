@@ -28,15 +28,27 @@ describe("index.html head completeness", () => {
   });
 
   it("has canonical Open Graph url + site_name + locale", () => {
-    headIncludes('<meta property="og:url" content="https://st-joseph.jesspete.shop/" />');
+    headIncludes(`<meta property="og:url" content="${site.url}" />`);
     headIncludes('<meta property="og:site_name" content="St Joseph\'s Church (Bukit Timah)" />');
     headIncludes('<meta property="og:locale" content="en_SG" />');
   });
 
   it("has an absolute og:image (share card renders on social platforms)", () => {
-    headIncludes(
-      '<meta property="og:image" content="https://st-joseph.jesspete.shop/images/hero-church.jpg" />',
-    );
+    headIncludes(`<meta property="og:image" content="${site.ogImage}" />`);
+  });
+
+  it("og:url and og:image are derived from site.origin (no drift)", () => {
+    expect(site.url).toBe(`${site.origin}/`);
+    expect(site.ogImage).toBe(`${site.origin}/images/hero-church.jpg`);
+    headIncludes(`<meta property="og:url" content="${site.url}" />`);
+    headIncludes(`<meta property="og:image" content="${site.ogImage}" />`);
+  });
+
+  it("JSON-LD url matches site.url (no drift)", () => {
+    const match = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+    expect(match).not.toBeNull();
+    const json = JSON.parse(match![1]!) as { url: string };
+    expect(json.url).toBe(site.url);
   });
 
   it("declares a twitter:card", () => {

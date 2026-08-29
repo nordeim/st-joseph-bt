@@ -62,4 +62,12 @@ export const site = {
     "https://www.google.com/maps/search/?api=1&query=620+Upper+Bukit+Timah+Road+Singapore+678116",
   mapsEmbedSrc:
     "https://www.google.com/maps?q=620+Upper+Bukit+Timah+Road,+Singapore+678116&output=embed",
+  /** Canonical origin — single source for og:url / og:image / JSON-LD url (drift-checked by src/head.test.ts). */
+  origin: "https://st-joseph.jesspete.shop",
+  get url() {
+    return `${this.origin}/`;
+  },
+  get ogImage() {
+    return `${this.origin}/images/hero-church.jpg`;
+  },
 } as const;

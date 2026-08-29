@@ -52,4 +52,13 @@ describe("site", () => {
     expect(site.feast.name).toBe("Feast of St Joseph the Worker");
     expect(site.feast.date).toBe("1 May");
   });
+
+  it("has canonical origin with derived url and ogImage", () => {
+    expect(site.origin).toMatch(/^https:\/\//);
+    expect(site.origin.endsWith("/")).toBe(false);
+    expect(site.url).toBe(`${site.origin}/`);
+    expect(site.ogImage).toBe(`${site.origin}/images/hero-church.jpg`);
+    // ogImage is absolute and uses the same origin
+    expect(site.ogImage.startsWith(site.origin)).toBe(true);
+  });
 });

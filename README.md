@@ -40,7 +40,7 @@ Every row below is implemented — no placeholders. Pages are named exports from
 | Icons | lucide-react | `1.34.0` | Header/footer + page iconography |
 | Utils | clsx + tailwind-merge | `2.1.1` / `3.6.0` | `cn()` class merging — always merge via `cn()` |
 | Bundling | vite-plugin-singlefile | `2.3.3` | Inlines JS+CSS into `dist/index.html` (`public/images/` copied to `dist/images/`) |
-| Testing | Vitest + Testing Library + jsdom | `3.2.6` / `16.2.0` / `26.1.0` | `vitest run` — **16 files / 89 tests** (`src/utils/cn` 5 + `data/nav` 7 + `data/content` 10 + `data/site` 6 + `ui/Button` 9 + `SkipLink` 3 + `ui/Accordion` 6 + `SafeImage` 6 + `Header` 11 + `BackToTop` 6 + `pages/Ministries` 3 + `pages/cta-bands` 3 + `Layout` 2 + `hooks/useScrollProgress` 4 + `ScrollProgress` 2 + `head` 6) via `src/test/setup.ts` |
+| Testing | Vitest + Testing Library + jsdom | `3.2.6` / `16.2.0` / `26.1.0` | `vitest run` — **16 files / 92 tests** (`src/utils/cn` 5 + `data/nav` 7 + `data/content` 10 + `data/site` 7 + `ui/Button` 9 + `SkipLink` 3 + `ui/Accordion` 6 + `SafeImage` 6 + `Header` 11 + `BackToTop` 6 + `pages/Ministries` 3 + `pages/cta-bands` 3 + `Layout` 2 + `hooks/useScrollProgress` 4 + `ScrollProgress` 2 + `head` 8) via `src/test/setup.ts` |
 | E2E | Playwright | `1.55.1` | `chromium`, `webServer` → `pnpm exec vite --port 5173 --host 127.0.0.1 --strictPort`, `e2e/` — **35 tests** (smoke 11 + navigation 8 + ministries 4 + give-faq 4 + enhancements 8) |
 | Linting | ESLint flat + typescript-eslint + react-hooks | `9.39.5` / `8.28.0` / `5.2.0` | `eslint . --max-warnings 0`, `eslint.config.js` (ignores `dist`, `skills`, `src.orig`) |
 | Fonts | Google Fonts | — | `Fraunces` (display) + `Source Sans 3` (body) via `index.html` |
@@ -128,7 +128,7 @@ flowchart TB
 │   │   └── 📄 cn.ts         # twMerge(clsx) — always merge via cn()
 │   ├── 📂 test/
 │   │   └── 📄 setup.ts      # vitest jsdom setup (jest-dom + IntersectionObserver mock + scrollTo/scrollIntoView stubs + matchMedia stub)
-│   └── 📂 **/*.test.{ts,tsx} # 16 files / 89 tests: utils/cn (5), data/nav (7), data/content (10), data/site (6), ui/Button (9), SkipLink (3), ui/Accordion (6), SafeImage (6), Header (11), BackToTop (6), pages/Ministries (3), pages/cta-bands (3), Layout (2), hooks/useScrollProgress (4), ScrollProgress (2), head (6)
+│   └── 📂 **/*.test.{ts,tsx} # 16 files / 92 tests: utils/cn (5), data/nav (7), data/content (10), data/site (7), ui/Button (9), SkipLink (3), ui/Accordion (6), SafeImage (6), Header (11), BackToTop (6), pages/Ministries (3), pages/cta-bands (3), Layout (2), hooks/useScrollProgress (4), ScrollProgress (2), head (8)
 ├── 📂 e2e/                  # 35 tests (Playwright chromium)
 │   ├── 📄 smoke.spec.ts     # 11 smoke (hero + rise-in entrance + Worship/Ministries aliases + hash anchors + NotFound + mobile drawer + drawer same-route close regression + event chips + back-to-top)
 │   ├── 📄 navigation.spec.ts# 8 desktop Worship/Ministries dropdown + keyboard + SkipLink + footer 10 links + Give + aria-current nav states
@@ -181,7 +181,7 @@ pnpm preview
 ```bash
 pnpm lint               # eslint flat — expect no output (clean)
 pnpm typecheck         # tsc --noEmit — expect no output (clean)
-pnpm test               # vitest jsdom — expect 16 files / 89 passed (cn 5 + nav 7 + content 10 + site 6 + Button 9 + SkipLink 3 + Accordion 6 + SafeImage 6 + Header 11 + BackToTop 6 + Ministries 3 + cta-bands 3 + Layout 2 + useScrollProgress 4 + ScrollProgress 2 + head 6)
+pnpm test               # vitest jsdom — expect 16 files / 92 passed (cn 5 + nav 7 + content 10 + site 7 + Button 9 + SkipLink 3 + Accordion 6 + SafeImage 6 + Header 11 + BackToTop 6 + Ministries 3 + cta-bands 3 + Layout 2 + useScrollProgress 4 + ScrollProgress 2 + head 8)
 pnpm test:e2e           # Playwright chromium — expect 35 passed (smoke 11 + navigation 8 + ministries 4 + give-faq 4 + enhancements 8)
 pnpm build              # expect: "✓ built in ~3s" + "Inlining: index-*.js / style-*.css"
 ls -lh dist/index.html  # expect: single HTML file, no separate assets chunk
@@ -252,7 +252,7 @@ This repo follows the six-phase workflow in `CLAUDE.md` (ANALYZE → PLAN → VA
 - **Commits:** Conventional Commits — `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `style:` — atomic, subject ≤72 chars.
 - **Branches:** `feat/<slug>`, `fix/<slug>`, `docs/<slug>` — short-lived (1–3 days), squash-merge.
 - **Conventions:** `PascalCase.tsx` for components/pages, `camelCase.ts` for data/utils, `primaryNav` single-source, alias routes preserved, `cn()` for merges, `shrine-*` tokens only.
-- **Pre-push gate:** `pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build` — all five green (16 unit files / 89 tests + 35 E2E + singlefile build) — CI mirrors this in `.github/workflows/ci.yml` (Node 24, pnpm 11).
+- **Pre-push gate:** `pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm build` — all five green (16 unit files / 92 tests + 35 E2E + singlefile build) — CI mirrors this in `.github/workflows/ci.yml` (Node 24, pnpm 11).
 
 > `skills/` is vendored, git-tracked reference content (agent skills index: `skills/skills-catalog.md`) — not project source; lint/build tooling ignores it. `src.orig/` is **not part of this repository** (never committed); its ignore entries are inert defensive guards. See `AGENTS.md` for the compact cheat sheet.
 
