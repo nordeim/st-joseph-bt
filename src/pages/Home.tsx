@@ -49,7 +49,9 @@ export function Home() {
 
         <Container className="relative z-10 w-full pb-28 pt-36 sm:pb-32 sm:pt-44">
           <p className="rise-in text-xs font-semibold uppercase tracking-[0.32em] text-shrine-gold-300">
-            Saint Joseph&apos;s Church · Bukit Timah · {site.chineseName}
+            <span className="whitespace-nowrap">Saint Joseph&apos;s Church</span>
+            <span className="whitespace-nowrap"> · Bukit Timah</span>
+            <span className="whitespace-nowrap"> · {site.chineseName}</span>
           </p>
           <h1 className="rise-in rise-in-d1 mt-5 max-w-3xl text-balance font-display text-4xl font-semibold text-shrine-cream sm:text-6xl lg:text-7xl">
             A church on the hill since 1846.
@@ -226,7 +228,7 @@ export function Home() {
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-shrine-gold-300">
               Belong here
             </p>
-            <h2 className="mt-4 max-w-xl text-balance font-display text-3xl font-semibold sm:text-4xl">
+            <h2 className="mt-4 max-w-xl text-balance font-display text-3xl font-semibold text-shrine-cream sm:text-4xl">
               Serve at the altar, sit with the poor, or simply come to Mass.
             </h2>
             <p className="mt-5 max-w-lg text-shrine-cream/75">

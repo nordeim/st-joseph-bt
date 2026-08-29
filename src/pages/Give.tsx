@@ -82,7 +82,7 @@ export function Give() {
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-shrine-gold-300">
               Ready to give?
             </p>
-            <h2 className="mx-auto mt-4 max-w-xl text-balance font-display text-3xl font-semibold sm:text-4xl">
+            <h2 className="mx-auto mt-4 max-w-xl text-balance font-display text-3xl font-semibold text-shrine-cream sm:text-4xl">
               A gift of any size keeps a lamp burning on the hill.
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-shrine-cream/75">

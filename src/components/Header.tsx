@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { Emblem } from "@/components/Emblem";
+import { ScrollProgress } from "@/components/ScrollProgress";
 import { Container } from "@/components/ui/Container";
 import { primaryNav } from "@/data/nav";
 import { site } from "@/data/site";
@@ -177,6 +178,8 @@ export function Header() {
         </button>
       </Container>
 
+      <ScrollProgress />
+
       {mobileOpen ? (
         <div
           id={menuId}
@@ -195,14 +198,25 @@ export function Header() {
             }}
           >
             <ul className="space-y-1">
-              {primaryNav.map((item) => (
-                <li key={item.label} className="border-b border-shrine-cream/10">
+              {primaryNav.map((item, index) => {
+                const drawerChildActive =
+                  item.children?.some((child) => child.to.split("#")[0] === pathname) ?? false;
+                return (
+                <li
+                  key={item.label}
+                  className="drawer-item-in border-b border-shrine-cream/10"
+                  style={{ animationDelay: `${index * 40}ms` }}
+                >
                   {item.children ? (
                     <div>
                       <button
                         type="button"
                         aria-expanded={openMobileSection === item.label}
-                        className="flex w-full items-center justify-between py-3 text-left text-base font-medium text-shrine-cream"
+                        aria-current={drawerChildActive ? "true" : undefined}
+                        className={cn(
+                          "flex w-full items-center justify-between py-3 text-left text-base font-medium transition-colors hover:text-shrine-gold-300",
+                          drawerChildActive ? "text-shrine-gold-300" : "text-shrine-cream",
+                        )}
                         onClick={() =>
                           setOpenMobileSection((current) =>
                             current === item.label ? null : item.label,
@@ -234,13 +248,24 @@ export function Header() {
                       ) : null}
                     </div>
                   ) : (
-                    <Link to={item.to} className="block py-3 text-base font-medium text-shrine-cream">
+                    <Link
+                      to={item.to}
+                      aria-current={pathname === item.to ? "page" : undefined}
+                      className={cn(
+                        "block py-3 text-base font-medium transition-colors hover:text-shrine-gold-300",
+                        pathname === item.to ? "text-shrine-gold-300" : "text-shrine-cream",
+                      )}
+                    >
                       {item.label}
                     </Link>
                   )}
                 </li>
-              ))}
-              <li>
+                );
+              })}
+              <li
+                className="drawer-item-in"
+                style={{ animationDelay: `${primaryNav.length * 40}ms` }}
+              >
                 <Link
                   to="/give"
                   className="mt-4 block bg-shrine-gold-500 px-4 py-3 text-center text-sm font-semibold uppercase tracking-wide text-shrine-maroon-900"

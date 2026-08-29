@@ -50,7 +50,7 @@ export function Serve() {
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-shrine-gold-300">
               Neighbourhood
             </p>
-            <h2 className="mt-4 font-display text-3xl font-semibold sm:text-4xl">
+            <h2 className="mt-4 font-display text-3xl font-semibold text-shrine-cream sm:text-4xl">
               Get to know your Catholic neighbours.
             </h2>
             <p className="mt-5 text-shrine-cream/75">

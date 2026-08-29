@@ -41,6 +41,27 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    scrollbar-color: var(--color-shrine-maroon-600) var(--color-shrine-parchment);
+    scrollbar-width: thin;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-shrine-parchment);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-shrine-maroon-600);
+    border-radius: 8px;
+    border: 2px solid var(--color-shrine-parchment);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-shrine-maroon-500);
   }
 
   body {
@@ -240,6 +261,39 @@
 
   .drawer-in {
     animation: drawer-in 0.24s ease-out both;
+  }
+
+  /* Route-change entrance: keyed wrapper in Layout replays this on pathname
+     change only (hash-only updates keep the same DOM node). */
+  @keyframes page-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .page-in {
+    animation: page-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Mobile drawer link stagger (see Header drawer-item-in usage). */
+  @keyframes drawer-item-in {
+    from {
+      opacity: 0;
+      transform: translateX(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .drawer-item-in {
+    animation: drawer-item-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
   /* Expanding gold halo behind a timeline dot (transform/opacity only). */

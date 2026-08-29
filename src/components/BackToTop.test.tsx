@@ -1,11 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { BackToTop } from "@/components/BackToTop";
 
 function setScrollY(value: number) {
   Object.defineProperty(window, "scrollY", { value, configurable: true });
   fireEvent.scroll(window);
+}
+
+function setScrollMetrics(scrollY: number, scrollHeight: number, innerHeight: number) {
+  Object.defineProperty(window, "scrollY", { value: scrollY, configurable: true });
+  Object.defineProperty(document.documentElement, "scrollHeight", {
+    value: scrollHeight,
+    configurable: true,
+  });
+  Object.defineProperty(window, "innerHeight", { value: innerHeight, configurable: true });
 }
 
 describe("BackToTop", () => {
@@ -67,5 +76,29 @@ describe("BackToTop", () => {
     await user.click(screen.getByRole("button", { name: /back to top/i }));
     expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "auto" });
     media.mockRestore();
+  });
+
+  it("carries a scroll progress ring that fills with page depth", async () => {
+    setScrollMetrics(0, 2000, 800);
+    render(<BackToTop />);
+    const ring = screen.getByTestId("back-to-top-progress");
+    expect(ring).toHaveAttribute("aria-hidden", "true");
+    const indicator = ring.querySelector("circle[data-progress]") as SVGCircleElement | null;
+    expect(indicator).not.toBeNull();
+    const circumference = Number(indicator!.getAttribute("stroke-dasharray"));
+    expect(circumference).toBeCloseTo(2 * Math.PI * 20, 1);
+    // At the top the ring is empty: dashoffset equals the full circumference.
+    await waitFor(() =>
+      expect(Number(indicator!.getAttribute("stroke-dashoffset"))).toBeCloseTo(circumference, 1),
+    );
+    // Mid-document (600 of 1200 scrollable) the ring is half full.
+    setScrollMetrics(600, 2000, 800);
+    fireEvent.scroll(window);
+    await waitFor(() =>
+      expect(Number(indicator!.getAttribute("stroke-dashoffset"))).toBeCloseTo(
+        circumference / 2,
+        1,
+      ),
+    );
   });
 });

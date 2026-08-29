@@ -40,7 +40,12 @@ export function Layout() {
       <SkipLink />
       <Header />
       <main id="main-content">
-        <Outlet />
+        {/* Keyed by pathname only: hash-only updates (anchor links) keep the
+            same node so the Layout anchor-scroll effect is undisturbed, while
+            route changes remount and replay the page-in entrance. */}
+        <div key={pathname} data-testid="page-container" data-route={pathname} className="page-in">
+          <Outlet />
+        </div>
       </main>
       <BackToTop />
       <Footer />
