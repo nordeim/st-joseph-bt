@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="St Joseph's Church Bukit Timah — a refined static landing page concept.">
+  <title>St Joseph's Church — Bukit Timah</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ink: #18251f;
+      --ink-soft: #425049;
+      --forest: #27463a;
+      --forest-deep: #17352b;
+      --sage: #dce4dc;
+      --cream: #f7f2e8;
+      --paper: #fffdf8;
+      --stone: #e9e1d3;
+      --gold: #b18a4b;
+      --gold-soft: #d8c49a;
+      --rose: #8c5149;
+      --line: rgba(24, 37, 31, .14);
+      --shadow: 0 22px 70px rgba(30, 38, 32, .12);
+      --radius: 2px;
+      --max: 1240px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "DM Sans", sans-serif;
+      line-height: 1.6;
+    }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    :focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 4px;
+    }
+
+    .container {
+      width: min(calc(100% - 40px), var(--max));
+      margin-inline: auto;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 18px;
+      color: var(--gold);
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 28px;
+      height: 1px;
+      background: currentColor;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-family: "Cormorant Garamond", serif;
+      font-weight: 600;
+      letter-spacing: -.025em;
+      line-height: .98;
+    }
+    h1 { font-size: clamp(4rem, 8vw, 7.8rem); }
+    h2 { font-size: clamp(3rem, 5vw, 5.2rem); }
+    h3 { font-size: 2rem; }
+
+    .announcement {
+      background: var(--forest-deep);
+      color: #f8f3e9;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      font-size: .76rem;
+      letter-spacing: .04em;
+    }
+    .announcement .container {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: center;
+    }
+    .announcement strong { color: var(--gold-soft); }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(255,253,248,.94);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(16px);
+    }
+    nav {
+      min-height: 78px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-width: max-content;
+    }
+    .brand-mark {
+      width: 39px;
+      height: 39px;
+      border: 1px solid var(--gold);
+      display: grid;
+      place-items: center;
+      color: var(--forest);
+      position: relative;
+    }
+    .brand-mark::before {
+      content: "✦";
+      font-size: 1.05rem;
+    }
+    .brand-copy strong {
+      display: block;
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.35rem;
+      line-height: 1;
+    }
+    .brand-copy span {
+      color: var(--ink-soft);
+      display: block;
+      font-size: .62rem;
+      letter-spacing: .13em;
+      margin-top: 3px;
+      text-transform: uppercase;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 26px;
+      color: var(--ink-soft);
+      font-size: .82rem;
+      font-weight: 600;
+    }
+    .nav-links a:hover { color: var(--forest); }
+    .nav-cta {
+      border: 1px solid var(--forest);
+      padding: 10px 16px;
+      color: var(--forest);
+    }
+    .nav-cta:hover { background: var(--forest); color: white; }
+
+    .hero {
+      background: var(--cream);
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+    }
+    .hero-grid {
+      min-height: 700px;
+      display: grid;
+      grid-template-columns: .92fr 1.08fr;
+      align-items: stretch;
+    }
+    .hero-copy {
+      padding: 86px 7vw 80px 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+    .hero-copy::after {
+      content: "1846";
+      position: absolute;
+      right: -20px;
+      bottom: 12px;
+      color: rgba(39,70,58,.07);
+      font-family: "Cormorant Garamond", serif;
+      font-size: 12rem;
+      font-weight: 700;
+      line-height: 1;
+      pointer-events: none;
+    }
+    .hero h1 span { color: var(--forest); }
+    .hero-lede {
+      max-width: 520px;
+      margin: 28px 0 34px;
+      color: var(--ink-soft);
+      font-size: 1.05rem;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 20px;
+      border: 1px solid var(--forest);
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      transition: .2s ease;
+    }
+    .button.primary { background: var(--forest); color: #fff; }
+    .button.primary:hover { background: var(--forest-deep); }
+    .button.secondary { color: var(--forest); }
+    .button.secondary:hover { background: rgba(39,70,58,.07); }
+
+    .hero-media {
+      position: relative;
+      min-height: 700px;
+      overflow: hidden;
+      background: #c8bba5;
+    }
+    .hero-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      filter: saturate(.83) contrast(.96);
+    }
+    .hero-media::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(23,53,43,.12), transparent 35%),
+                  linear-gradient(0deg, rgba(17,27,23,.25), transparent 35%);
+      pointer-events: none;
+    }
+    .hero-caption {
+      position: absolute;
+      z-index: 2;
+      left: 28px;
+      bottom: 26px;
+      color: white;
+      max-width: 320px;
+      font-size: .76rem;
+      text-shadow: 0 1px 12px rgba(0,0,0,.45);
+    }
+    .hero-caption strong { display: block; font-size: .85rem; margin-bottom: 4px; }
+
+    .mass-bar {
+      background: var(--forest);
+      color: #fff;
+    }
+    .mass-grid {
+      display: grid;
+      grid-template-columns: 1.2fr repeat(4, 1fr);
+      align-items: stretch;
+    }
+    .mass-intro, .mass-item {
+      padding: 25px 22px;
+      border-right: 1px solid rgba(255,255,255,.15);
+    }
+    .mass-intro strong {
+      display: block;
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.55rem;
+    }
+    .mass-intro span, .mass-item span {
+      color: #c8d5cd;
+      display: block;
+      font-size: .7rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .mass-item strong {
+      display: block;
+      font-size: .96rem;
+      margin-top: 4px;
+    }
+
+    section { padding: 112px 0; }
+    .intro {
+      background: var(--paper);
+    }
+    .intro-grid {
+      display: grid;
+      grid-template-columns: .75fr 1.25fr;
+      gap: 100px;
+      align-items: start;
+    }
+    .intro-copy {
+      max-width: 720px;
+    }
+    .intro-copy p {
+      margin: 22px 0 0;
+      color: var(--ink-soft);
+      font-size: 1.12rem;
+    }
+    .ornament {
+      width: 78px;
+      height: 78px;
+      margin-top: 8px;
+      border: 1px solid var(--gold-soft);
+      display: grid;
+      place-items: center;
+      color: var(--gold);
+      transform: rotate(45deg);
+    }
+    .ornament span { transform: rotate(-45deg); font-size: 1.6rem; }
+
+    .parish {
+      background: var(--cream);
+    }
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 30px;
+      margin-bottom: 48px;
+    }
+    .section-head > div:last-child {
+      max-width: 390px;
+      color: var(--ink-soft);
+      font-size: .92rem;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1.35fr .65fr .65fr;
+      min-height: 490px;
+      gap: 2px;
+    }
+    .feature {
+      position: relative;
+      min-height: 360px;
+      overflow: hidden;
+      background: var(--forest);
+    }
+    .feature img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: saturate(.7);
+      transition: transform .5s ease;
+    }
+    .feature:hover img { transform: scale(1.035); }
+    .feature::after {
+      content: "";
+      position: absolute;
+      inset: 35% 0 0;
+      background: linear-gradient(transparent, rgba(12,23,18,.86));
+    }
+    .feature-content {
+      position: absolute;
+      z-index: 2;
+      inset: auto 28px 28px;
+      color: #fff;
+    }
+    .feature-content small {
+      color: #dbc99f;
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+    .feature-content h3 { margin-top: 7px; }
+    .feature-content p {
+      margin: 9px 0 0;
+      color: #dbe2dc;
+      font-size: .8rem;
+    }
+
+    .heritage {
+      background: var(--forest-deep);
+      color: #f6f0e6;
+    }
+    .heritage-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 90px;
+      align-items: center;
+    }
+    .heritage-copy p {
+      max-width: 600px;
+      color: #c8d2cc;
+      margin: 24px 0 0;
+      font-size: 1rem;
+    }
+    .heritage-stats {
+      margin-top: 36px;
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+    .stat strong {
+      display: block;
+      color: var(--gold-soft);
+      font-family: "Cormorant Garamond", serif;
+      font-size: 3rem;
+      line-height: 1;
+    }
+    .stat span {
+      color: #aebdb5;
+      display: block;
+      margin-top: 6px;
+      font-size: .72rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .heritage-image {
+      position: relative;
+    }
+    .heritage-image img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      filter: sepia(.12) saturate(.75);
+    }
+    .heritage-image::before {
+      content: "";
+      position: absolute;
+      inset: 16px -16px -16px 16px;
+      border: 1px solid rgba(216,196,154,.45);
+      pointer-events: none;
+    }
+
+    .schedule {
+      background: var(--paper);
+    }
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: .7fr 1.3fr;
+      gap: 90px;
+    }
+    .schedule-copy p {
+      color: var(--ink-soft);
+      margin-top: 22px;
+    }
+    .schedule-table {
+      border-top: 1px solid var(--line);
+    }
+    .schedule-row {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 20px;
+      padding: 19px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: .88rem;
+    }
+    .schedule-row strong { font-weight: 700; }
+    .schedule-row span { color: var(--ink-soft); }
+
+    .visit {
+      background: var(--stone);
+    }
+    .visit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+    }
+    .visit-card {
+      min-height: 330px;
+      padding: 44px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+    .visit-card.dark {
+      background: var(--rose);
+      color: white;
+      border-color: transparent;
+    }
+    .visit-card p {
+      color: var(--ink-soft);
+      max-width: 460px;
+    }
+    .visit-card.dark p { color: #f0dbd7; }
+    .visit-card .button { margin-top: 18px; }
+    .visit-card.dark .button {
+      border-color: #fff;
+      color: #fff;
+    }
+    .visit-card.dark .button:hover { background: rgba(255,255,255,.1); }
+
+    footer {
+      background: #10241d;
+      color: #dbe2dc;
+      padding: 56px 0 32px;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr .8fr;
+      gap: 60px;
+      padding-bottom: 50px;
+      border-bottom: 1px solid rgba(255,255,255,.13);
+    }
+    footer h3 { color: white; font-size: 1.6rem; }
+    footer p, footer a {
+      color: #aebdb5;
+      font-size: .8rem;
+    }
+    footer a:hover { color: white; }
+    .footer-links { display: grid; gap: 8px; }
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding-top: 25px;
+      color: #82958c;
+      font-size: .68rem;
+      letter-spacing: .04em;
+    }
+
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .hero-grid, .intro-grid, .heritage-grid, .schedule-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero-copy { padding: 74px 0 54px; }
+      .hero-media { min-height: 500px; }
+      .mass-grid { grid-template-columns: 1fr 1fr; }
+      .mass-intro { grid-column: 1 / -1; }
+      .feature-grid { grid-template-columns: 1fr 1fr; }
+      .feature:first-child { grid-column: 1 / -1; }
+      .visit-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .container { width: min(calc(100% - 28px), var(--max)); }
+      .announcement .container { justify-content: center; }
+      .announcement .announcement-side { display: none; }
+      nav { min-height: 68px; }
+      .hero-copy { padding: 58px 0 46px; }
+      h1 { font-size: clamp(3.4rem, 17vw, 5rem); }
+      section { padding: 76px 0; }
+      .mass-grid, .feature-grid, .footer-grid { grid-template-columns: 1fr; }
+      .mass-intro { grid-column: auto; }
+      .feature:first-child { grid-column: auto; }
+      .feature { min-height: 330px; }
+      .section-head { display: block; }
+      .section-head > div:last-child { margin-top: 18px; }
+      .heritage-grid, .intro-grid, .schedule-grid { gap: 48px; }
+      .visit-card { min-height: 280px; padding: 32px; }
+      .footer-bottom { display: block; }
+      .footer-bottom span + span { display: block; margin-top: 8px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="announcement">
+    <div class="container">
+      <span><strong>180 years of faith</strong> · Celebrating St Joseph's Church, Bukit Timah</span>
+      <span class="announcement-side">620 Upper Bukit Timah Road · Singapore 678116</span>
+    </div>
+  </div>
+
+  <header>
+    <div class="container">
+      <nav aria-label="Primary navigation">
+        <a class="brand" href="#">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span class="brand-copy">
+            <strong>St Joseph's Church</strong>
+            <span>Bukit Timah · Singapore</span>
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="#welcome">Welcome</a>
+          <a href="#parish">Parish Life</a>
+          <a href="#heritage">Our Story</a>
+          <a href="#mass">Mass</a>
+          <a href="#visit">Visit</a>
+          <a class="nav-cta" href="#visit">Get Directions</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">Welcome home</p>
+          <h1 id="hero-title">A place of <span>faith</span>, family &amp; quiet hope.</h1>
+          <p class="hero-lede">
+            Rooted in Bukit Timah since 1846, St Joseph's Church is a community
+            gathered around the Eucharist, prayer, service and the enduring witness of St Joseph.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#mass">Mass times</a>
+            <a class="button secondary" href="#parish">Explore parish life</a>
+          </div>
+        </div>
+
+        <figure class="hero-media">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Saint_Joseph%27s_Church%2C_Bukit_Timah.jpg/1280px-Saint_Joseph%27s_Church%2C_Bukit_Timah.jpg"
+            alt="St Joseph's Church in Bukit Timah, with its central tower and green tiled roofs"
+          >
+          <figcaption class="hero-caption">
+            <strong>St Joseph's Church · Bukit Timah</strong>
+            A landmark shaped by Singapore's Catholic heritage.
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="mass-bar" aria-label="Mass highlights">
+      <div class="container mass-grid">
+        <div class="mass-intro">
+          <span>Come and worship</span>
+          <strong>Mass this week</strong>
+        </div>
+        <div class="mass-item">
+          <span>Weekday morning</span>
+          <strong>Mon–Sat · 6:30am</strong>
+        </div>
+        <div class="mass-item">
+          <span>Weekday evening</span>
+          <strong>Mon–Fri · 6:30pm</strong>
+        </div>
+        <div class="mass-item">
+          <span>Saturday</span>
+          <strong>Sunset · 5:30pm</strong>
+        </div>
+        <div class="mass-item">
+          <span>Sunday</span>
+          <strong>7:30am · 9:30am · 11:30am · 5:30pm</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="intro" id="welcome">
+      <div class="container intro-grid">
+        <div>
+          <div class="ornament" aria-hidden="true"><span>✝</span></div>
+        </div>
+        <div class="intro-copy">
+          <p class="eyebrow">The parish</p>
+          <h2>Come as you are. Find a community to walk with.</h2>
+          <p>
+            Whether you are returning to church, discovering the Catholic faith,
+            raising a family, seeking prayer, or simply looking for a quiet place
+            to be still, there is a place for you here.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="parish" id="parish">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Around the parish</p>
+            <h2>Life beyond Sunday.</h2>
+          </div>
+          <div>
+            A clearer, calmer way to discover ministries, prayer groups,
+            formation and the ordinary rhythms that make parish life feel like home.
+          </div>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature">
+            <img
+              src="https://stjoseph-bt.org.sg/images/stjo/gallery/About/001.jpg"
+              alt="Interior of St Joseph's Church"
+              loading="lazy"
+            >
+            <div class="feature-content">
+              <small>Prayer &amp; devotion</small>
+              <h3>Make space for prayer.</h3>
+              <p>Rosary, Holy Hour, Eucharistic devotion and moments of quiet.</p>
+            </div>
+          </article>
+
+          <article class="feature">
+            <img
+              src="https://stjoseph-bt.org.sg/images/stjo/gallery/About/024.jpg"
+              alt="Chapel of the Resurrection and columbarium"
+              loading="lazy"
+            >
+            <div class="feature-content">
+              <small>Pastoral care</small>
+              <h3>Walk with one another.</h3>
+              <p>Support, service and community across the seasons of life.</p>
+            </div>
+          </article>
+
+          <article class="feature">
+            <img
+              src="https://stjoseph-bt.org.sg/images/bagallery/original/Picture9.jpg"
+              alt="St Joseph's Church Bukit Timah"
+              loading="lazy"
+            >
+            <div class="feature-content">
+              <small>Formation</small>
+              <h3>Grow in faith.</h3>
+              <p>Discover formation, sacraments and ways to serve.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="heritage" id="heritage">
+      <div class="container heritage-grid">
+        <div class="heritage-copy">
+          <p class="eyebrow">Our story</p>
+          <h2>A long story. A living church.</h2>
+          <p>
+            St Joseph's Church traces its beginnings to 1846. Its story is part
+            of Singapore's wider Catholic journey — shaped by generations of
+            worshippers, families, clergy and neighbours who have called this
+            place home.
+          </p>
+          <div class="heritage-stats">
+            <div class="stat">
+              <strong>1846</strong>
+              <span>Year established</span>
+            </div>
+            <div class="stat">
+              <strong>180</strong>
+              <span>Years of faith</span>
+            </div>
+            <div class="stat">
+              <strong>01 May</strong>
+              <span>Feast of St Joseph</span>
+            </div>
+          </div>
+        </div>
+
+        <figure class="heritage-image">
+          <img
+            src="https://stjoseph-bt.org.sg/images/stjo/gallery/About/024.jpg"
+            alt="Quiet chapel space at St Joseph's Church"
+            loading="lazy"
+          >
+        </figure>
+      </div>
+    </section>
+
+    <section class="schedule" id="mass">
+      <div class="container schedule-grid">
+        <div class="schedule-copy">
+          <p class="eyebrow">Mass &amp; sacraments</p>
+          <h2>Gather around the table.</h2>
+          <p>
+            Times below reflect the parish schedule published on the current
+            church website. Please check parish announcements before travelling
+            for special liturgies or holiday changes.
+          </p>
+          <a class="button secondary" href="#visit">Plan your visit</a>
+        </div>
+
+        <div class="schedule-table" aria-label="Mass schedule">
+          <div class="schedule-row">
+            <strong>Weekday morning</strong>
+            <span>Monday–Saturday · 6:30am · Chapel of St Joseph</span>
+          </div>
+          <div class="schedule-row">
+            <strong>Weekday evening</strong>
+            <span>Monday–Friday · 6:30pm · Chapel of St Joseph</span>
+          </div>
+          <div class="schedule-row">
+            <strong>Saturday sunset</strong>
+            <span>5:30pm · Main Church</span>
+          </div>
+          <div class="schedule-row">
+            <strong>Sunday Mandarin</strong>
+            <span>7:30am · Main Church</span>
+          </div>
+          <div class="schedule-row">
+            <strong>Sunday English</strong>
+            <span>9:30am · 11:30am · 5:30pm</span>
+          </div>
+          <div class="schedule-row">
+            <strong>Confessions</strong>
+            <span>15 minutes before all weekend Masses · open foyer</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="visit" id="visit">
+      <div class="container visit-grid">
+        <article class="visit-card">
+          <p class="eyebrow">Find us</p>
+          <h2>Come through the doors.</h2>
+          <p>
+            620 Upper Bukit Timah Road, Singapore 678116.
+            The nearest MRT station is Cashew. Bus services include
+            67, 75, 170, 176, 178, 184, 961, 963 and 970.
+          </p>
+          <a class="button secondary" href="https://www.google.com/maps/search/?api=1&query=St+Joseph%27s+Church+Bukit+Timah+620+Upper+Bukit+Timah+Road+Singapore" target="_blank" rel="noopener">Get directions</a>
+        </article>
+
+        <article class="visit-card dark">
+          <p class="eyebrow">A place for you</p>
+          <h2>Need to know something?</h2>
+          <p>
+            Explore parish announcements, services, sacraments, ministries,
+            donations and the latest bulletin.
+          </p>
+          <a class="button" href="https://stjoseph-bt.org.sg/" target="_blank" rel="noopener">Visit parish website</a>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <h3>St Joseph's Church</h3>
+          <p>620 Upper Bukit Timah Road<br>Singapore 678116</p>
+          <p>Year built: 1846 · Patron Saint: St Joseph</p>
+        </div>
+        <div>
+          <p class="eyebrow">Explore</p>
+          <div class="footer-links">
+            <a href="#welcome">Welcome</a>
+            <a href="#parish">Parish life</a>
+            <a href="#heritage">Our story</a>
+            <a href="#mass">Mass &amp; sacraments</a>
+          </div>
+        </div>
+        <div>
+          <p class="eyebrow">Connect</p>
+          <div class="footer-links">
+            <a href="https://stjoseph-bt.org.sg/" target="_blank" rel="noopener">Official website</a>
+            <a href="https://www.youtube.com/" target="_blank" rel="noopener">YouTube</a>
+            <a href="https://www.facebook.com/" target="_blank" rel="noopener">Facebook</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>Static visual concept · content based on the parish website</span>
+        <span>© 2026 St Joseph's Church (Bukit Timah)</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

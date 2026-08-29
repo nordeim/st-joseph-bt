@@ -370,7 +370,9 @@
       transition: none;
     }
 
-    .hero-ken-burns {
+    .hero-ken-burns,
+    .page-in,
+    .drawer-item-in {
       animation: none;
     }
 

@@ -30,10 +30,10 @@ All commands verified in `package.json` `scripts`. Don't document a script until
 ## Structure
 
 ```
-src/ (45 files — 33 source + 11 tests + 1 setup)
+src/ (52 files — 35 source + 16 tests + 1 setup)
   App.tsx              # HashRouter + 17 Route entries (16 content paths + * NotFound; see Routing below)
   main.tsx             # StrictMode + createRoot
-  index.css            # @theme tokens (24 colors + 2 shadows) + @layer base/utilities (22 utilities: text-balance, bg-adobe-texture, bg-grain, divider-weave, divider-weave-thin, gold-rule, gold-rule-left, hero-ken-burns, mask-fade-b, reveal, reveal-visible, rise-in + rise-in-d1..d4, menu-in, drawer-in, dot-pulse, card-lift, link-underline, skip-link + 6 keyframes gold-rule-draw/hero-ken-burns/rise-in/menu-in/drawer-in/halo-pulse)
+  index.css            # @theme tokens (24 colors + 2 shadows) + @layer base/utilities (24 utilities: text-balance, bg-adobe-texture, bg-grain, divider-weave, divider-weave-thin, gold-rule, gold-rule-left, hero-ken-burns, mask-fade-b, reveal, reveal-visible, rise-in + rise-in-d1..d4, menu-in, drawer-in, drawer-item-in, page-in, dot-pulse, card-lift, link-underline, skip-link + 8 keyframes gold-rule-draw/hero-ken-burns/rise-in/menu-in/drawer-in/drawer-item-in/page-in/halo-pulse + themed scrollbar (maroon thumb on parchment track, webkit + scrollbar-color))
   components/          # Layout (+SkipLink +BackToTop), Header (useScrolled(16) + aria-current nav states + menu-in/drawer-in entrances), Footer, PageHero (rise-in staged content), Emblem, Timeline (dot-pulse halos), SocialIcons, SafeImage (Wikimedia/Pexels→local fallback), BackToTop (threshold 480, reduced-motion-aware), ui/{Button (active press),Container,SectionHeading,Accordion (animated grid-rows collapse),Reveal}
   hooks/               # useScrolled.ts (threshold 12 default; Header passes 16)
   pages/               # Home, About, History, Worship, Ministries, NewsEvents, Serve, Give, FAQ, NotFound (10 pages, all named exports: Home, About, History, Worship, Ministries, NewsEvents, Serve, Give, FAQ, NotFound)
@@ -45,7 +45,7 @@ vite.config.ts         # alias @→src + test { globals, jsdom, setupFiles: src/
 tsconfig.json          # strict + noUnusedLocals/noUnusedParameters/noFallthroughCasesInSwitch/isolatedModules/noEmit + include [src, vite.config.ts, eslint.config.js, playwright.config.ts] + types [node, vitest/globals] + paths @/*
 eslint.config.js       # flat config (typescript-eslint 8 + react-hooks 5 + react-refresh); ignores [dist, node_modules, coverage, playwright-report, test-results, skills, src.orig]
 playwright.config.ts   # Playwright 1.55.1 (chromium, webServer → pnpm exec vite :5173, expect timeout 15s; CSP is a meta tag in index.html, not a config header)
-e2e/                   # 27 tests — smoke.spec.ts (11) + navigation.spec.ts (8) + ministries.spec.ts (4) + give-faq.spec.ts (4) + helpers.ts
+e2e/                   # 35 tests — smoke.spec.ts (11) + navigation.spec.ts (8) + ministries.spec.ts (4) + give-faq.spec.ts (4) + enhancements.spec.ts (8) + helpers.ts
 .github/workflows/ci.yml # CI: lint → typecheck → test → test:e2e (chromium) → build + artifacts (Node 24, pnpm 11)
 public/images/         # 8 files: hero-church.jpg, chapel-interior.jpg, sanctuary.jpg, rosary-garden.jpg, stained-glass.jpg, parish-hall.jpg, cemetery.jpg, feast.jpg (Vite publicDir → dist/images/ — upload alongside dist/index.html); Wikimedia hero + 2 Pexels CDN images with SafeImage local fallback
 index.html             # Google Fonts Fraunces + Source Sans 3; CSP allows images from upload.wikimedia.org + images.pexels.com, frames from google.com (maps embed); OG tags for St Joseph's Church (Bukit Timah)
